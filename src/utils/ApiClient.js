@@ -87,7 +87,7 @@ class AppAuthStore extends LocalAuthStore {
 }
 
 const client = new PocketBase(
-    import.meta.env.PB_BACKEND_URL,
+    "https://cnpm.fly.dev",
     new AppAuthStore("pb_admin_auth")
 );
 console.log("🚀 ~ client", client)
