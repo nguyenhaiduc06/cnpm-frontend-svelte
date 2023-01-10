@@ -1,14 +1,12 @@
 <script>
     import { querystring } from "svelte-spa-router";
-    import { pageTitle } from "@/stores/app";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import ResidentsList from "./ResidentsList.svelte";
     import { CollectionHouseholds, CollectionResidentSnapshots } from "../../utils/database/collections";
-
-    $pageTitle = "Collections";
+    import FormPanel from "@/components/base/FormPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: householdId = reactiveParams.get("householdId") || "";
@@ -46,10 +44,6 @@
         </button>
         <div class="flex-fill" />
         <div class="btns-group">
-            <button type="button" class="btn btn-outline" on:click={() => {}}>
-                <i class="ri-history-line" />
-                <span class="txt">Lịch sử thay đổi</span>
-            </button>
             <button type="button" class="btn btn-expanded" on:click={() => residentUpsertPanel?.show()}>
                 <i class="ri-add-line" />
                 <span class="txt">Đăng kí thường trú</span>
@@ -81,4 +75,10 @@
     on:delete={() => residentsList?.reloadLoadedPages()}
     on:create={(e) => console.log("🚀 create record with data", e.detail.number)}
     on:update={(e) => console.log("🚀 update record with data", e.detail)}
+/>
+
+<FormPanel
+    bind:this={householdSelectPanel}
+    on:submit={(e) => console.log('FormPanel submitted with data', e.detail)}
+    fields={CollectionResidentSnapshots.schema.filter((field) => field.name == "household")}
 />
