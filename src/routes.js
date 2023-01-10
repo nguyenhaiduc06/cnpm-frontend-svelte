@@ -4,6 +4,9 @@ import ApiClient             from "@/utils/ApiClient";
 import PageIndex             from "@/components/PageIndex.svelte";
 import PageLogs              from "@/components/logs/PageLogs.svelte";
 import PageRecords           from "@/components/records/PageRecords.svelte";
+import PageManage            from "@/components/manage/PageManage.svelte";
+import PageHouseholds        from "@/components/manage/PageHouseholds.svelte";
+import PageResidents         from "@/components/manage/PageResidents.svelte";
 import PageAdmins            from "@/components/admins/PageAdmins.svelte";
 import PageAdminLogin        from "@/components/admins/PageAdminLogin.svelte";
 import PageApplication       from "@/components/settings/PageApplication.svelte";
@@ -47,6 +50,24 @@ const routes = {
 
     "/collections": wrap({
         component:  PageRecords,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/manage": wrap({
+        component:  PageManage,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/manage/households": wrap({
+        component:  PageHouseholds,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/manage/residents": wrap({
+        component:  PageResidents,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),

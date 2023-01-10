@@ -91,6 +91,16 @@
                     <i class="ri-database-2-line" />
                 </a>
                 <a
+                    href="/manage"
+                    class="menu-item"
+                    aria-label="Quản lý"
+                    use:link
+                    use:active={{ path: "/manage/.*", className: "current-route" }}
+                    use:tooltip={{ text: "Quản lý", position: "right" }}
+                >
+                    <i class="ri-database-2-line" />
+                </a>
+                <a
                     href="/logs"
                     class="menu-item"
                     aria-label="Logs"
