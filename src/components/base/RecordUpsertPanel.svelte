@@ -30,7 +30,7 @@
     const TAB_PROVIDERS = "providers";
 
     export let collection;
-    export let fieldNames;
+    export let fieldNames = [];
     $: fields =
         fieldNames && fieldNames.length
             ? collection?.schema.filter((field) => fieldNames.includes(field.name))
