@@ -21,5 +21,21 @@
         >
             <span class="txt">Nhân khẩu</span>
         </a>
+        <a
+            href="/manage/absent"
+            class="sidebar-list-item"
+            use:link
+            use:active={{ path: "/manage/absent.*", className: "active" }}
+        >
+            <span class="txt">Tạm vắng</span>
+        </a>
+        <a
+            href="/manage/temporary"
+            class="sidebar-list-item"
+            use:link
+            use:active={{ path: "/manage/temporary.*", className: "active" }}
+        >
+            <span class="txt">Tạm trú</span>
+        </a>
     </div>
 </aside>
