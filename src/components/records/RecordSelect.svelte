@@ -11,11 +11,13 @@
     export let multiple = false;
     export let selected = [];
     export let keyOfSelected = multiple ? [] : undefined;
-    export let selectPlaceholder = "- Select -";
+    export let selectPlaceholder;
+    export let disable = false;
     export let optionComponent = RecordSelectOption; // custom component to use for each dropdown option item
 
     // custom props
     export let collectionId;
+    $: keyOfSelected = disable ? selectPlaceholder : keyOfSelected;
 
     let list = [];
     let currentPage = 1;
@@ -36,6 +38,7 @@
     $: isLoading = isLoadingList || isLoadingSelected;
 
     $: canLoadMore = totalItems > list.length;
+    $: console.log(keyOfSelected);
 
     async function loadCollection() {
         if (!collectionId) {
@@ -146,7 +149,7 @@
     searchable={list.length > 5}
     selectionKey="id"
     labelComponent={optionComponent}
-    disabled={isLoading}
+    disabled={isLoading || disable}
     {optionComponent}
     {multiple}
     bind:keyOfSelected

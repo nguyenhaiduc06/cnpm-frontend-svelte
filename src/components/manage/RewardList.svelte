@@ -13,10 +13,11 @@
     import IdLabel from "@/components/base/IdLabel.svelte";
     import HorizontalScroller from "@/components/base/HorizontalScroller.svelte";
     import RecordFieldCell from "@/components/records/RecordFieldCell.svelte";
+    import { CollectionReward, CollectionResidentSnapshots } from "../../utils/database/collections";
 
     const dispatch = createEventDispatcher();
 
-    export let collection;
+    const collection = CollectionReward;
     export let sort = "";
     export let filter = "";
 
@@ -74,6 +75,7 @@
         if (!collection?.id) {
             return;
         }
+
         localStorage.setItem(collection?.id + "@hiddenCollumns", JSON.stringify(hiddenColumns));
     }
 
@@ -106,9 +108,7 @@
         }
 
         isLoading = true;
-        //for (const recordId of Object.keys(bulkSelected)) {
-
-        // }
+        console.log(ApiClient.authStore.isValid);
 
         return ApiClient.collection(collection.id)
             .getList(page, 30, {
@@ -116,14 +116,13 @@
                 filter: filter,
             })
             .then(async (result) => {
-                console.log(result.items);
                 if (page <= 1) {
                     clearList();
                 }
+                console.log(result.items);
                 isLoading = false;
                 currentPage = result.page;
                 totalRecords = result.totalItems;
-
                 dispatch("load", records.concat(result.items));
 
                 // optimize the records listing by rendering the rows in task batches
@@ -203,15 +202,6 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            let residentList = [];
-            let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
-                sort: "",
-                filter: `reward_report = "${recordId}"`,
-            });
-            residentList = res.items;
-            console.log(residentList);
-            residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
-            console.log(promises.length);
             promises.push(ApiClient.collection(collection.id).delete(recordId));
         }
 
@@ -230,6 +220,54 @@
             .finally(() => {
                 isDeleting = false;
 
+                // always reload because some of the records may not be deletable
+                return reloadLoadedPages();
+            });
+    }
+
+    async function maskAsDead() {
+        let promises = [];
+        for (const recordId of Object.keys(bulkSelected)) {
+            const residentSnapshot = bulkSelected[recordId];
+            const { resident, household } = residentSnapshot;
+
+            const newSnapshotData = {
+                resident,
+                household,
+                note: "dead",
+                active: true,
+            };
+
+            // //create new snapshot
+            const newSnapshot = await ApiClient.collection(CollectionResidentSnapshots.name).create(
+                newSnapshotData
+            );
+
+            await ApiClient.collection(CollectionResidentSnapshots.name).update(recordId, {
+                active: false,
+            });
+
+            //create new change
+            await ApiClient.collection(CollectionReward.name).create({
+                resident,
+                old_household: household,
+                new_household: household,
+                old_snapshot: residentSnapshot.id,
+                new_snapshot: newSnapshot.id,
+                change_type: "dead",
+            });
+        }
+        return Promise.all(promises)
+            .then(() => {
+                addSuccessToast(
+                    `Successfully mark selected ${totalBulkSelected === 1 ? "record" : "records"} as dead.`
+                );
+                deselectAllRecords();
+            })
+            .catch((err) => {
+                ApiClient.errorResponseHandler(err);
+            })
+            .finally(() => {
                 // always reload because some of the records may not be deletable
                 return reloadLoadedPages();
             });
@@ -488,7 +526,7 @@
 
 {#if totalBulkSelected}
     <div class="bulkbar" transition:fly|local={{ duration: 150, y: 5 }}>
-        <div class="txt">
+        <!-- <div class="txt">
             Selected <strong>{totalBulkSelected}</strong>
             {totalBulkSelected === 1 ? "record" : "records"}
         </div>
@@ -500,15 +538,33 @@
         >
             <span class="txt">Reset</span>
         </button>
-        <div class="flex-fill" />
+        <div class="flex-fill" /> -->
+        <button
+            type="button"
+            class="btn btn-sm btn-secondary"
+            class:btn-loading={isDeleting}
+            class:btn-disabled={isDeleting}
+            on:click={() => dispatch("changeHousehold", bulkSelected)}
+        >
+            <span class="txt">Chuyển khẩu</span>
+        </button>
+        <button
+            type="button"
+            class="btn btn-sm btn-secondary"
+            class:btn-loading={isDeleting}
+            class:btn-disabled={isDeleting}
+            on:click={() => dispatch("splitHousehold", bulkSelected)}
+        >
+            <span class="txt">Tách khẩu</span>
+        </button>
         <button
             type="button"
             class="btn btn-sm btn-secondary btn-danger"
             class:btn-loading={isDeleting}
             class:btn-disabled={isDeleting}
-            on:click={() => deleteSelectedConfirm()}
+            on:click={() => maskAsDead()}
         >
-            <span class="txt">Delete selected</span>
+            <span class="txt">Qua đời</span>
         </button>
     </div>
 {/if}

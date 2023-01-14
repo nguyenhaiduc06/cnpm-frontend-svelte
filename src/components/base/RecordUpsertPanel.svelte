@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher, tick } from "svelte";
+    import { querystring } from "svelte-spa-router";
     import { Record } from "pocketbase";
     import CommonHelper from "@/utils/CommonHelper";
     import ApiClient from "@/utils/ApiClient";
@@ -30,13 +31,10 @@
     const TAB_PROVIDERS = "providers";
 
     export let collection;
+    export let excludedFields = [];
     export let fieldNames = [];
-    $: fields =
-        fieldNames && fieldNames.length
-            ? collection?.schema.filter((field) => fieldNames.includes(field.name))
-            : collection?.schema;
-    $: console.log("schema", collection?.schema);
 
+    export let excludedVal = [];
     let recordPanel;
     let original = null;
     let record = new Record();
@@ -46,7 +44,28 @@
     let deletedFileIndexesMap = {}; // eg.: {"field1":[0, 1], ...}
     let initialFormHash = "";
     let activeTab = TAB_FORM;
+    let excludedData = [];
 
+    // $: excludedFields.forEach((item, index) => {
+    //     excludedVal[index] = searchParams.get(item) || "";
+    // });
+
+    $: excludedFields.forEach((item, index) => {
+        excludedData[index] = { name: item, value: excludedVal[index] };
+    });
+    $: fields = (
+        fieldNames && fieldNames.length
+            ? collection?.schema.filter((field) => fieldNames.includes(field.name))
+            : collection?.schema
+    ).map((x) => ({
+        ...x,
+        excluded: {
+            state: excludedFields.includes(x.name),
+            defaultVal: excludedVal[excludedFields.findIndex((n) => n == x.name)],
+        },
+    }));
+
+    $: console.log(excludedFields);
     $: hasFileChanges =
         CommonHelper.hasNonEmptyProps(uploadedFilesMap) ||
         CommonHelper.hasNonEmptyProps(deletedFileIndexesMap);
@@ -54,9 +73,11 @@
     $: hasChanges = hasFileChanges || initialFormHash != calculateFormHash(record);
 
     $: canSave = record.isNew || hasChanges;
+    $: console.log(record);
 
     export function show(model) {
         load(model);
+        console.log(model);
 
         confirmClose = true;
 
@@ -95,17 +116,21 @@
         isSaving = true;
 
         const data = exportFormData();
+        // let res = {};
+        // data.forEach((k, v) => (res[k] = v));
+        // console.log(res);
 
         let request;
         if (record.isNew) {
-            // request = ApiClient.collection(collection.id).create(data);
-            dispatch("create", data);
+            request = ApiClient.collection(collection.id).create(data);
+            //dispatch("create", data);
+            console.log("updateee");
         } else {
-            // request = ApiClient.collection(collection.id).update(record.id, data);
-            dispatch("update", data);
+            request = ApiClient.collection(collection.id).update(record.id, data);
+            //dispatch("update", data);
         }
 
-        return;
+        //return;
 
         request
             .then((result) => {
@@ -160,6 +185,7 @@
             exportableFields["passwordConfirm"] = true;
             exportableFields["verified"] = true;
         }
+        console.log(data);
 
         // export base fields
         for (const key in data) {
@@ -167,7 +193,10 @@
             if (!exportableFields[key]) {
                 continue;
             }
-
+            if (excludedFields.includes(key)) {
+                CommonHelper.addValueToFormData(formData, key, excludedData.find((x) => x.name == key).value);
+                continue;
+            }
             // normalize nullable values
             if (typeof data[key] === "undefined") {
                 data[key] = null;
@@ -375,7 +404,7 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    <RelationField {field} bind:value={record[field.name]} />
+                    <RelationField {field} bind:value={record[field.name]} excluded={field.excluded} />
                 {/if}
             {/each}
         </form>

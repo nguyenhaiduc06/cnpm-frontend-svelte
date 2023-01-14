@@ -348,3 +348,81 @@ export const CollectionTemporaryResidents = {
     deleteRule: null,
     options: {},
 };
+export const CollectionRewardReport = {
+    id: "5sela3i08hhb9u8",
+    name: "Reward Reports",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            //id: "od0piq2q",
+            name: "name",
+            type: "text",
+            // system: false,
+            // required: false,
+            // unique: false,
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionReward = {
+    id: "b2eiamk7yp7jby7",
+    name: "Rewards",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "resident",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "gabzhpa0gwujotf",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "reward_report",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "5sela3i08hhb9u8",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "school",
+            type: "text",
+        },
+        {
+            name: "class",
+            type: "text",
+        },
+        {
+            name: "grade",
+            type: "number",
+        },
+        {
+            name: "education_result",
+            type: "select",
+            options: {
+                maxSelect: 1,
+                values: ["Excellent", "Good", "Average", "Bad"],
+            },
+        },
+        {
+            name: "education_proof",
+            type: "file",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};

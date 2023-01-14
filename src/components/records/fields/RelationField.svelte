@@ -6,9 +6,12 @@
 
     export let field = new SchemaField();
     export let value = undefined;
+    export let excluded = false;
+
+    $: console.log({ ...field, excluded });
 
     $: isMultiple = field.options?.maxSelect != 1;
-
+    $: console.log(field);
     $: if (
         isMultiple &&
         Array.isArray(value) &&
@@ -26,8 +29,11 @@
     </label>
     <RecordSelect
         toggle
+        disable={excluded.state}
+        defaultValue={excluded.defaultValue}
         id={uniqueId}
         multiple={isMultiple}
+        selectPlaceholder={excluded.state ? excluded.defaultVal : "- Select -"}
         collectionId={field.options?.collectionId}
         bind:keyOfSelected={value}
     />

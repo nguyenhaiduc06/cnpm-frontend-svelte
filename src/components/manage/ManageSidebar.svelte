@@ -37,5 +37,13 @@
         >
             <span class="txt">Tạm trú</span>
         </a>
+        <a
+            href="/manage/reward-report"
+            class="sidebar-list-item"
+            use:link
+            use:active={{ path: "/manage/reward-report.*", className: "active" }}
+        >
+            <span class="txt">Khen thưởng</span>
+        </a>
     </div>
 </aside>
