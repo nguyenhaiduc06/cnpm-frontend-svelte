@@ -38,7 +38,6 @@
     $: isLoading = isLoadingList || isLoadingSelected;
 
     $: canLoadMore = totalItems > list.length;
-    $: console.log(keyOfSelected);
 
     async function loadCollection() {
         if (!collectionId) {

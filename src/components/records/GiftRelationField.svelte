@@ -12,7 +12,6 @@
     export let optionMetaField;
     export let filter;
 
-    //$: console.log({ ...field, excluded });
 
     $: isMultiple = field.options?.maxSelect != 1;
 
@@ -25,7 +24,6 @@
         value = value.slice(field.options.maxSelect - 1);
     }
     $: unique = field.options?.unique ? field.name : "";
-    $: console.log(unique, field);
 </script>
 
 <Field class="form-field {field.required ? 'required' : ''}" name={field.name} let:uniqueId>

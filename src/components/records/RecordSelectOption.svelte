@@ -10,7 +10,6 @@
     $: meta = extractMeta(item);
 
     function extractMeta(model) {
-        console.log(model);
         if (metaField != "") {
             let res = model[metaField] || "";
             return `${metaField}: ${res}`;

@@ -41,8 +41,6 @@
 
     async function handleSelectedChange(newSelected) {
         let extractedKeys = CommonHelper.toArray(newSelected, true).map((item) => item[selectionKey]);
-        console.log(extractedKeys);
-
         if (!items.length) {
             return; // options are still loading...
         }

@@ -8,10 +8,7 @@
     export let value = undefined;
     export let excluded = false;
 
-    $: console.log({ ...field, excluded });
-
     $: isMultiple = field.options?.maxSelect != 1;
-    $: console.log(field);
     $: if (
         isMultiple &&
         Array.isArray(value) &&

@@ -114,9 +114,6 @@
         }
 
         isLoading = true;
-        //for (const recordId of Object.keys(bulkSelected)) {
-
-        // }
 
         return ApiClient.collection(householdCollectionId)
             .getList(page, 30, {
@@ -131,7 +128,6 @@
                 isLoading = false;
                 currentPage = result.page;
                 //totalRecords = result.totalItems;
-                //console.log(result);
 
                 let householdResidents = [...result.items];
                 ApiClient.collection(giftCollectionId)
@@ -141,7 +137,6 @@
                     })
                     .then(async (res) => {
                         let giftList = res;
-                        console.log(res);
                         giftList = giftList.filter((n) => {
                             for (let i of householdResidents) {
                                 if (i.resident == n.resident) return true;
@@ -229,15 +224,6 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            // let residentList = [];
-            // let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
-            //     sort: "",
-            //     filter: `reward_report = "${recordId}"`,
-            // });
-            // residentList = res.items;
-            // console.log(residentList);
-            // residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
-            // console.log(promises.length);
             promises.push(ApiClient.collection(collection.id).delete(recordId));
         }
 

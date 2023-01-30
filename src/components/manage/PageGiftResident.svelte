@@ -19,7 +19,6 @@
     $: year = reactiveParams.get("year") || "";
     $: occasion = reactiveParams.get("occasion") || "";
     $: household = reactiveParams.get("household") || "";
-    $: console.log(household);
     let residentUpsertPanel;
     let residentsList;
     let rewardUpsertPanel;

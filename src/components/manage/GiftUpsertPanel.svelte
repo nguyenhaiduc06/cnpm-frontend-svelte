@@ -49,9 +49,6 @@
     let activeTab = TAB_FORM;
     let excludedData = [];
     let householdCollectionId = CollectionResidentSnapshots.id;
-    // $: excludedFields.forEach((item, index) => {
-    //     excludedVal[index] = searchParams.get(item) || "";
-    // });
 
     $: filter = household == "" ? "" : `household="${household}"`;
     $: excludedFields.forEach((item, index) => {
@@ -69,7 +66,6 @@
         },
     }));
 
-    $: console.log(excludedFields);
     $: hasFileChanges =
         CommonHelper.hasNonEmptyProps(uploadedFilesMap) ||
         CommonHelper.hasNonEmptyProps(deletedFileIndexesMap);
@@ -77,11 +73,9 @@
     $: hasChanges = hasFileChanges || initialFormHash != calculateFormHash(record);
 
     $: canSave = record.isNew || hasChanges;
-    $: console.log(record);
 
     export function show(model) {
         load(model);
-        console.log(model);
 
         confirmClose = true;
 
@@ -120,21 +114,13 @@
         isSaving = true;
 
         const data = exportFormData();
-        // let res = {};
-        // data.forEach((k, v) => (res[k] = v));
-        // console.log(res);
-
+  
         let request;
         if (record.isNew) {
             request = ApiClient.collection(collection.id).create(data);
-            //dispatch("create", data);
         } else {
             request = ApiClient.collection(collection.id).update(record.id, data);
-            //dispatch("update", data);
         }
-
-        //return;
-
         request
             .then((result) => {
                 addSuccessToast(

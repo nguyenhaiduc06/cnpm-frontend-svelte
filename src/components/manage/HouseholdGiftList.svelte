@@ -80,7 +80,6 @@
         ]
     );
     $: hiddenColumns = ["@created"];
-    $: console.log(hiddenColumns);
 
     function updateStoredHiddenColumns() {
         if (!collection?.id) {
@@ -118,9 +117,6 @@
         }
 
         isLoading = true;
-        //for (const recordId of Object.keys(bulkSelected)) {
-
-        // }
 
         return ApiClient.collection(collection.id)
             .getList(page, 30, {
@@ -128,7 +124,6 @@
                 filter: filter,
             })
             .then(async (result) => {
-                console.log(result, collection.id, page);
                 if (page <= 1) {
                     clearList();
                 }
@@ -147,11 +142,9 @@
                     );
                 }
                 Promise.all(promises).then(async (res) => {
-                    console.log(res.map((n) => n.items[0]));
                     for (let i of res.map((n) => n.items[0])) {
                         let index = renderItems.findIndex((n) => n.household == i.household);
                         if (index < 0) {
-                            console.log(renderItems.length);
                             renderItems.push({
                                 household: i.household,
                                 gift_received: 1,
@@ -160,7 +153,6 @@
                         } else renderItems[index].gift_received++;
                     }
                     totalRecords = renderItems.length;
-                    console.log(records.concat(renderItems));
 
                     //renderItems = renderItems.map(n => )
                     dispatch("load", records.concat(renderItems));
@@ -180,7 +172,6 @@
                     }
                 });
 
-                //console.log(Object.keys(renderItems));
             })
             .catch((err) => {
                 if (!err?.isAbort) {
@@ -256,7 +247,6 @@
                 let index = residentList.findIndex((n) => n.resident == x.resident);
                 return index >= 0 && x.gift_report == reportId;
             });
-            console.log(selectedHousehold, giftList);
             for (let i of giftList) {
                 promises.push(ApiClient.collection("gift").delete(i.id));
             }

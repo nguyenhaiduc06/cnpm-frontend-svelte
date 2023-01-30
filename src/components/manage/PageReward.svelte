@@ -64,13 +64,6 @@
     />
 </PageWrapper>
 
-<!-- <RecordUpsertPanel
-    bind:this={residentUpsertPanel}
-    collection={CollectionResidentSnapshots}
-    on:save={() => residentsList?.reloadLoadedPages()}
-    on:delete={() => residentsList?.reloadLoadedPages()}
-/> -->
-
 <RecordUpsertPanel
     bind:this={residentUpsertPanel}
     collection={CollectionReward}

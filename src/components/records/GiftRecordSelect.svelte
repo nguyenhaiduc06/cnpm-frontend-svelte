@@ -44,12 +44,10 @@
             loadList(true);
         });
     }
-    //$: console.log(unique);
 
     $: isLoading = isLoadingList || isLoadingSelected;
 
     $: canLoadMore = totalItems > list.length;
-    $: console.log(keyOfSelected);
 
     async function loadCollection() {
         if (!collectionId) {
@@ -149,7 +147,6 @@
                 });
 
                 const existedItems = giftList.items.map((x) => x[unique]);
-                console.log(existedItems);
                 result.items = result.items.filter((x) => !existedItems.includes(x.resident));
                 result.items.map((x) => (x.id = x.resident));
                 result.items.map(async (x) => {
@@ -161,7 +158,6 @@
             list = CommonHelper.filterDuplicatesByKey(
                 list.concat(result.items, CommonHelper.toArray(selected))
             );
-            console.log(list);
             currentPage = result.page;
             totalItems = result.totalItems;
         } catch (err) {
