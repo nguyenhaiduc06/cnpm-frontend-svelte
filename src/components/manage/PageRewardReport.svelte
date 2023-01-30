@@ -21,7 +21,7 @@
     <header class="page-header">
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Collections</div>
-            <div class="breadcrumb-item">{CollectionHouseholds.name}</div>
+            <div class="breadcrumb-item">Reward Reports</div>
         </nav>
 
         <div class="inline-flex gap-5">

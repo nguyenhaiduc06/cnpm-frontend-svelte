@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from "svelte";
+    import { location } from "svelte-spa-router";
     import { fly } from "svelte/transition";
     import ApiClient from "@/utils/ApiClient";
     import CommonHelper from "@/utils/CommonHelper";
@@ -13,12 +14,17 @@
     import IdLabel from "@/components/base/IdLabel.svelte";
     import HorizontalScroller from "@/components/base/HorizontalScroller.svelte";
     import RecordFieldCell from "@/components/records/RecordFieldCell.svelte";
+    import { CollectionResidentSnapshots, CollectionGift } from "../../utils/database/collections";
 
     const dispatch = createEventDispatcher();
 
     export let collection;
     export let sort = "";
-    export let filter = "";
+    export let reportId = "";
+    export let household = "";
+
+    $: filterReport = `gift_report="${reportId}"`;
+    $: filterHousehold = `household="${household}"`;
 
     let records = [];
     let currentPage = 1;
@@ -30,14 +36,16 @@
     let columnsTrigger;
     let hiddenColumns = [];
     let collumnsToHide = [];
+    let giftCollectionId = CollectionGift.id;
+    let householdCollectionId = CollectionResidentSnapshots.id;
 
     $: if (collection?.id) {
         loadStoredHiddenColumns();
         clearList();
     }
 
-    $: if (collection?.id && sort !== -1 && filter !== -1) {
-        load(1);
+    $: if (collection?.id && sort !== -1 && filterHousehold !== -1) {
+        if ($location == "/manage/gift-resident") load(1);
     }
 
     $: canLoadMore = totalRecords > records.length;
@@ -110,37 +118,55 @@
 
         // }
 
-        return ApiClient.collection(collection.id)
+        return ApiClient.collection(householdCollectionId)
             .getList(page, 30, {
                 sort: sort,
-                filter: filter,
+                filter: filterHousehold,
             })
             .then(async (result) => {
-                console.log(result.items);
+                console.trace();
                 if (page <= 1) {
                     clearList();
                 }
                 isLoading = false;
                 currentPage = result.page;
-                totalRecords = result.totalItems;
+                //totalRecords = result.totalItems;
+                //console.log(result);
 
-                dispatch("load", records.concat(result.items));
+                let householdResidents = [...result.items];
+                ApiClient.collection(giftCollectionId)
+                    .getFullList(200, {
+                        sort: "",
+                        filter: filterReport,
+                    })
+                    .then(async (res) => {
+                        let giftList = res;
+                        console.log(res);
+                        giftList = giftList.filter((n) => {
+                            for (let i of householdResidents) {
+                                if (i.resident == n.resident) return true;
+                            }
+                            return false;
+                        });
+                        totalRecords = giftList.length;
+                        dispatch("load", records.concat(giftList));
 
-                // optimize the records listing by rendering the rows in task batches
-                if (breakTasks) {
-                    const currentYieldId = ++yieldedRecordsId;
-                    while (result.items.length) {
-                        if (yieldedRecordsId != currentYieldId) {
-                            break; // new yeild has been started
+                        // optimize the records listing by rendering the rows in task batches
+                        if (breakTasks) {
+                            const currentYieldId = ++yieldedRecordsId;
+                            while (giftList.length) {
+                                if (yieldedRecordsId != currentYieldId) {
+                                    break; // new yeild has been started
+                                }
+
+                                records = records.concat(giftList.splice(0, 15));
+
+                                await CommonHelper.yieldToMain();
+                            }
+                        } else {
+                            records = records.concat(giftList);
                         }
-
-                        records = records.concat(result.items.splice(0, 15));
-
-                        await CommonHelper.yieldToMain();
-                    }
-                } else {
-                    records = records.concat(result.items);
-                }
+                    });
             })
             .catch((err) => {
                 if (!err?.isAbort) {
@@ -203,15 +229,15 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            let residentList = [];
-            let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
-                sort: "",
-                filter: `reward_report = "${recordId}"`,
-            });
-            residentList = res.items;
-            console.log(residentList);
-            residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
-            console.log(promises.length);
+            // let residentList = [];
+            // let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
+            //     sort: "",
+            //     filter: `reward_report = "${recordId}"`,
+            // });
+            // residentList = res.items;
+            // console.log(residentList);
+            // residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
+            // console.log(promises.length);
             promises.push(ApiClient.collection(collection.id).delete(recordId));
         }
 
@@ -451,11 +477,11 @@
                     <tr>
                         <td colspan="99" class="txt-center txt-hint p-xs">
                             <h6>No records found.</h6>
-                            {#if filter?.length}
+                            {#if filterHousehold?.length}
                                 <button
                                     type="button"
                                     class="btn btn-hint btn-expanded m-t-sm"
-                                    on:click={() => (filter = "")}
+                                    on:click={() => (filterHousehold = "")}
                                 >
                                     <span class="txt">Clear filters</span>
                                 </button>

@@ -5,12 +5,17 @@
     const excludedMetaProps = ["id", "created", "updated", "collectionId", "collectionName"];
 
     export let item = {}; // model
+    export let metaField = "";
 
     $: meta = extractMeta(item);
 
     function extractMeta(model) {
+        console.log(model);
+        if (metaField != "") {
+            let res = model[metaField] || "";
+            return `${metaField}: ${res}`;
+        }
         model = model || {};
-
         const props = [
             // prioritized common displayable props
             "title",

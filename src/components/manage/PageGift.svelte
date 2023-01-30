@@ -6,14 +6,17 @@
     import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import ResidentsList from "./ResidentsList.svelte";
-    import { CollectionReward, CollectionResidentSnapshots } from "../../utils/database/collections";
+    import { CollectionGift } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import RewardList from "./RewardList.svelte";
     import RecordsList from "../records/RecordsList.svelte";
+    import GiftList from "./HouseholdGiftList.svelte";
+    import GiftUpsertPanel from "./GiftUpsertPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: reportId = reactiveParams.get("rewardreport") || "";
+    $: reportId = reactiveParams.get("giftreport") || "";
     $: year = reactiveParams.get("year") || "";
+    $: occasion = reactiveParams.get("occasion") || "";
     let residentUpsertPanel;
     let residentsList;
     let rewardUpsertPanel;
@@ -22,7 +25,7 @@
     let sort;
     let rewardList;
 
-    $: filter = reportId ? `reward_report ="${reportId}"` : "";
+    $: filter = reportId ? `gift_report ="${reportId}"` : "";
 </script>
 
 <ManageSidebar />
@@ -31,7 +34,7 @@
     <header class="page-header">
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
-            <div class="breadcrumb-item">Nhân khẩu</div>
+            <div class="breadcrumb-item">Danh sách phát quà</div>
         </nav>
 
         <div class="inline-flex">
@@ -41,7 +44,7 @@
     <div class="flex m-b-sm">
         <button type="button" class="btn btn-outline" on:click={() => {}}>
             {#if reportId}
-                <div class="breadcrumb-item">Các phần thưởng trong năm {year}</div>
+                <div class="breadcrumb-item">Các phần thưởng trong dịp {occasion} năm {year}</div>
             {:else}
                 <span class="txt">Tất cả hộ khẩu</span>
             {/if}
@@ -50,14 +53,14 @@
         <div class="btns-group">
             <button type="button" class="btn btn-expanded" on:click={() => residentUpsertPanel?.show()}>
                 <i class="ri-add-line" />
-                <span class="txt">Thêm khen thưởng</span>
+                <span class="txt">Thêm trao quà</span>
             </button>
         </div>
     </div>
 
-    <RewardList
+    <RecordsList
         bind:this={rewardList}
-        collection={CollectionReward}
+        collection={CollectionGift}
         bind:filter
         bind:sort
         on:select={(e) => residentUpsertPanel?.show(e?.detail)}
@@ -71,10 +74,10 @@
     on:delete={() => residentsList?.reloadLoadedPages()}
 /> -->
 
-<RecordUpsertPanel
+<GiftUpsertPanel
     bind:this={residentUpsertPanel}
-    collection={CollectionReward}
-    excludedFields={["reward_report"]}
+    collection={CollectionGift}
+    excludedFields={["gift_report"]}
     excludedVal={[reportId]}
     on:save={() => rewardList?.reloadLoadedPages()}
     on:delete={() => rewardList?.reloadLoadedPages()}
@@ -85,5 +88,5 @@
 <FormPanel
     bind:this={rewardSelectPanel}
     on:submit={(e) => console.log("FormPanel submitted with data", e.detail)}
-    fields={CollectionResidentSnapshots.schema.filter((field) => field.name == "household")}
+    fields={CollectionGift.schema.filter((field) => field.name == "resident")}
 />

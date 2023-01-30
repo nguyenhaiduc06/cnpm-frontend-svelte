@@ -355,12 +355,8 @@ export const CollectionRewardReport = {
     system: false,
     schema: [
         {
-            //id: "od0piq2q",
             name: "name",
             type: "text",
-            // system: false,
-            // required: false,
-            // unique: false,
         },
     ],
     listRule: null,
@@ -417,6 +413,67 @@ export const CollectionReward = {
         {
             name: "education_proof",
             type: "file",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionGiftReport = {
+    id: "pzgz9wrl4rk10kq",
+    name: "Reward Reports",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "occasion",
+            type: "text",
+        },
+        {
+            name: "year",
+            type: "text",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionGift = {
+    id: "50lx5fxhb96g1oz",
+    name: "Rewards",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "resident",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "s4r3ipyouaoe4eo",
+                cascadeDelete: false,
+                unique: true,
+                metaField: "name",
+            },
+        },
+        {
+            name: "gift_report",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                metaField: "occasion",
+                collectionId: "pzgz9wrl4rk10kq",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "cost",
+            type: "number",
         },
     ],
     listRule: null,

@@ -20,6 +20,10 @@ import PageExportCollections from "@/components/settings/PageExportCollections.s
 import PageImportCollections from "@/components/settings/PageImportCollections.svelte";
 import PageReward from "./components/manage/PageReward.svelte";
 import PageRewardReport from "./components/manage/PageRewardReport.svelte";
+import PageGift from "./components/manage/PageGift.svelte";
+import PageGiftReport from "./components/manage/PageGiftReport.svelte";
+import PageGiftHousehold from "./components/manage/PageGiftHousehold.svelte";
+import PageGiftResident from "./components/manage/PageGiftResident.svelte";
 
 const baseConditions = [
     async (details) => {
@@ -94,6 +98,21 @@ const routes = {
     }),
     "/manage/reward-report": wrap({
         component: PageRewardReport,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+    "/manage/gift": wrap({
+        component: PageGiftHousehold,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+    "/manage/gift-report": wrap({
+        component: PageGiftReport,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+    "/manage/gift-resident": wrap({
+        component: PageGiftResident,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),

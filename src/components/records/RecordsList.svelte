@@ -116,13 +116,14 @@
                 filter: filter,
             })
             .then(async (result) => {
-                console.log(result.items);
+                //console.log(result.items);
                 if (page <= 1) {
                     clearList();
                 }
                 isLoading = false;
                 currentPage = result.page;
                 totalRecords = result.totalItems;
+                console.log(records.concat(result.items));
 
                 dispatch("load", records.concat(result.items));
 
@@ -203,15 +204,15 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            let residentList = [];
-            let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
-                sort: "",
-                filter: `reward_report = "${recordId}"`,
-            });
-            residentList = res.items;
-            console.log(residentList);
-            residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
-            console.log(promises.length);
+            // let residentList = [];
+            // let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
+            //     sort: "",
+            //     filter: `reward_report = "${recordId}"`,
+            // });
+            // residentList = res.items;
+            // console.log(residentList);
+            // residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
+            // console.log(promises.length);
             promises.push(ApiClient.collection(collection.id).delete(recordId));
         }
 

@@ -23,6 +23,8 @@
     import FileField from "@/components/records/fields/FileField.svelte";
     import RelationField from "@/components/records/fields/RelationField.svelte";
     import ExternalAuthsList from "@/components/records/ExternalAuthsList.svelte";
+    import GiftRelationField from "../records/GiftRelationField.svelte";
+    import { CollectionResidentSnapshots, CollectionGift } from "../../utils/database/collections";
 
     const dispatch = createEventDispatcher();
 
@@ -33,6 +35,7 @@
     export let collection;
     export let excludedFields = [];
     export let fieldNames = [];
+    export let household = "";
 
     export let excludedVal = [];
     let recordPanel;
@@ -45,11 +48,12 @@
     let initialFormHash = "";
     let activeTab = TAB_FORM;
     let excludedData = [];
-
+    let householdCollectionId = CollectionResidentSnapshots.id;
     // $: excludedFields.forEach((item, index) => {
     //     excludedVal[index] = searchParams.get(item) || "";
     // });
 
+    $: filter = household == "" ? "" : `household="${household}"`;
     $: excludedFields.forEach((item, index) => {
         excludedData[index] = { name: item, value: excludedVal[index] };
     });
@@ -65,6 +69,7 @@
         },
     }));
 
+    $: console.log(excludedFields);
     $: hasFileChanges =
         CommonHelper.hasNonEmptyProps(uploadedFilesMap) ||
         CommonHelper.hasNonEmptyProps(deletedFileIndexesMap);
@@ -72,9 +77,11 @@
     $: hasChanges = hasFileChanges || initialFormHash != calculateFormHash(record);
 
     $: canSave = record.isNew || hasChanges;
+    $: console.log(record);
 
     export function show(model) {
         load(model);
+        console.log(model);
 
         confirmClose = true;
 
@@ -115,6 +122,7 @@
         const data = exportFormData();
         // let res = {};
         // data.forEach((k, v) => (res[k] = v));
+        // console.log(res);
 
         let request;
         if (record.isNew) {
@@ -180,6 +188,7 @@
             exportableFields["passwordConfirm"] = true;
             exportableFields["verified"] = true;
         }
+        console.log(data);
 
         // export base fields
         for (const key in data) {
@@ -398,7 +407,14 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    <RelationField {field} bind:value={record[field.name]} excluded={field.excluded} />
+                    <GiftRelationField
+                        {field}
+                        bind:value={record[field.name]}
+                        excluded={field.excluded}
+                        filter={field.options?.collectionId == householdCollectionId ? filter : ""}
+                        labelMetaField={field.options?.metaField}
+                        optionMetaField={field.options?.metaField}
+                    />
                 {/if}
             {/each}
         </form>

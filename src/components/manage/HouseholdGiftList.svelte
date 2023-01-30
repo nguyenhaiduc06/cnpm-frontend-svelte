@@ -19,6 +19,7 @@
     export let collection;
     export let sort = "";
     export let filter = "";
+    export let reportId = "";
 
     let records = [];
     let currentPage = 1;
@@ -28,7 +29,7 @@
     let isDeleting = false;
     let yieldedRecordsId = 0;
     let columnsTrigger;
-    let hiddenColumns = [];
+    let hiddenColumns = ["@created"];
     let collumnsToHide = [];
 
     $: if (collection?.id) {
@@ -42,9 +43,18 @@
 
     $: canLoadMore = totalRecords > records.length;
 
-    $: fields = collection?.schema || [];
-
-    $: visibleFields = fields.filter((field) => !hiddenColumns.includes(field.id));
+    //$: fields = collection?.schema || [];
+    $: fields = [
+        {
+            name: "household",
+            type: "text",
+        },
+        {
+            name: "gift_received",
+            type: "text",
+        },
+    ];
+    $: visibleFields = fields;
 
     $: totalBulkSelected = Object.keys(bulkSelected).length;
 
@@ -69,6 +79,8 @@
             { id: "@updated", name: "updated" },
         ]
     );
+    $: hiddenColumns = ["@created"];
+    $: console.log(hiddenColumns);
 
     function updateStoredHiddenColumns() {
         if (!collection?.id) {
@@ -116,31 +128,59 @@
                 filter: filter,
             })
             .then(async (result) => {
-                console.log(result.items);
+                console.log(result, collection.id, page);
                 if (page <= 1) {
                     clearList();
                 }
                 isLoading = false;
                 currentPage = result.page;
-                totalRecords = result.totalItems;
 
-                dispatch("load", records.concat(result.items));
-
-                // optimize the records listing by rendering the rows in task batches
-                if (breakTasks) {
-                    const currentYieldId = ++yieldedRecordsId;
-                    while (result.items.length) {
-                        if (yieldedRecordsId != currentYieldId) {
-                            break; // new yeild has been started
-                        }
-
-                        records = records.concat(result.items.splice(0, 15));
-
-                        await CommonHelper.yieldToMain();
-                    }
-                } else {
-                    records = records.concat(result.items);
+                let renderItems = [];
+                let promises = [];
+                for (let i of result.items) {
+                    promises.push(
+                        ApiClient.collection("s4r3ipyouaoe4eo").getList(1, 1, {
+                            sort: "",
+                            filter: `resident="${i.resident}"`,
+                            $autoCancel: false,
+                        })
+                    );
                 }
+                Promise.all(promises).then(async (res) => {
+                    console.log(res.map((n) => n.items[0]));
+                    for (let i of res.map((n) => n.items[0])) {
+                        let index = renderItems.findIndex((n) => n.household == i.household);
+                        if (index < 0) {
+                            console.log(renderItems.length);
+                            renderItems.push({
+                                household: i.household,
+                                gift_received: 1,
+                                id: renderItems.length + 1,
+                            });
+                        } else renderItems[index].gift_received++;
+                    }
+                    totalRecords = renderItems.length;
+                    console.log(records.concat(renderItems));
+
+                    //renderItems = renderItems.map(n => )
+                    dispatch("load", records.concat(renderItems));
+                    if (breakTasks) {
+                        const currentYieldId = ++yieldedRecordsId;
+                        while (renderItems.length) {
+                            if (yieldedRecordsId != currentYieldId) {
+                                break; // new yeild has been started
+                            }
+
+                            records = records.concat(renderItems.splice(0, 15));
+
+                            await CommonHelper.yieldToMain();
+                        }
+                    } else {
+                        records = records.concat(renderItems);
+                    }
+                });
+
+                //console.log(Object.keys(renderItems));
             })
             .catch((err) => {
                 if (!err?.isAbort) {
@@ -203,16 +243,23 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            let residentList = [];
-            let res = await ApiClient.collection("b2eiamk7yp7jby7").getList(1, 30, {
+            let selectedHousehold = bulkSelected[recordId].household;
+            let giftList = await ApiClient.collection("gift").getFullList(200, {
+                filter: "",
                 sort: "",
-                filter: `reward_report = "${recordId}"`,
             });
-            residentList = res.items;
-            console.log(residentList);
-            residentList.forEach((x) => promises.push(ApiClient.collection("b2eiamk7yp7jby7").delete(x.id)));
-            console.log(promises.length);
-            promises.push(ApiClient.collection(collection.id).delete(recordId));
+            let residentList = await ApiClient.collection("resident_snapshots").getFullList(200, {
+                filter: `household="${selectedHousehold}"`,
+                sort: "",
+            });
+            giftList = giftList.filter((x) => {
+                let index = residentList.findIndex((n) => n.resident == x.resident);
+                return index >= 0 && x.gift_report == reportId;
+            });
+            console.log(selectedHousehold, giftList);
+            for (let i of giftList) {
+                promises.push(ApiClient.collection("gift").delete(i.id));
+            }
         }
 
         isDeleting = true;
@@ -322,7 +369,7 @@
                     </SortHeader>
                 {/each}
 
-                {#if !hiddenColumns.includes("@created")}
+                <!-- {#if !hiddenColumns.includes("@created")}
                     <SortHeader class="col-type-date col-field-created" name="created" bind:sort>
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon("date")} />
@@ -338,7 +385,7 @@
                             <span class="txt">updated</span>
                         </div>
                     </SortHeader>
-                {/if}
+                {/if} -->
 
                 <th class="col-type-action min-width">
                     <button bind:this={columnsTrigger} type="button" class="btn btn-sm btn-secondary p-0">
@@ -424,7 +471,7 @@
                         <RecordFieldCell {record} {field} />
                     {/each}
 
-                    {#if !hiddenColumns.includes("@created")}
+                    <!-- {#if !hiddenColumns.includes("@created")}
                         <td class="col-type-date col-field-created">
                             <FormattedDate date={record.created} />
                         </td>
@@ -434,7 +481,7 @@
                         <td class="col-type-date col-field-updated">
                             <FormattedDate date={record.updated} />
                         </td>
-                    {/if}
+                    {/if} -->
 
                     <td class="col-type-action min-width">
                         <i class="ri-arrow-right-line" />
