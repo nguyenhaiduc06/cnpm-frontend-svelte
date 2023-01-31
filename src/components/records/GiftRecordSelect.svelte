@@ -5,11 +5,10 @@
     import RecordSelectOption from "./RecordSelectOption.svelte";
     import RecordUpsertPanel from "@/components/records/RecordUpsertPanel.svelte";
     import { querystring } from "svelte-spa-router";
-    import { debug } from "svelte/internal";
 
     const uniqueId = "select_" + CommonHelper.randomString(5);
 
-    // original select props
+    // original select props 
     export let multiple = false;
     export let selected = [];
     export let keyOfSelected = multiple ? [] : undefined;
@@ -149,15 +148,29 @@
                 const existedItems = giftList.items.map((x) => x[unique]);
                 result.items = result.items.filter((x) => !existedItems.includes(x.resident));
                 result.items.map((x) => (x.id = x.resident));
-                result.items.map(async (x) => {
-                    const resident = await ApiClient.collection("residents").getOne(x.id);
+                
+                // result.items.map(async (x) => {
+                //     const resident = await ApiClient.collection("residents").getOne(x.id, {
+                //         $$autoCancel: false
+                //     });
+                //     x.name = resident.name;
+                // });
+                for(let x of result.items){
+                    const resident = await ApiClient.collection("residents").getOne(x.id, {
+                        $autoCancel: false
+                    });
+                    const snapshot = await ApiClient.collection("resident_snapshots").getFullList(1, {
+                        filter:`resident="${x.id}"`, $autoCancel: false
+                    })
                     x.name = resident.name;
-                });
-            }
-
+                    x.household = snapshot[0].household;
+                    //console.log(snap)
+                }   
+            }  
             list = CommonHelper.filterDuplicatesByKey(
                 list.concat(result.items, CommonHelper.toArray(selected))
             );
+            console.log(list);
             currentPage = result.page;
             totalItems = result.totalItems;
         } catch (err) {

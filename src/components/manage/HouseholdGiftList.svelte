@@ -143,16 +143,19 @@
                 }
                 Promise.all(promises).then(async (res) => {
                     for (let i of res.map((n) => n.items[0])) {
-                        let index = renderItems.findIndex((n) => n.household == i.household);
+                        let index = renderItems.findIndex((n) => n.householdId == i.household);
                         if (index < 0) {
+                            let householdAddress = (await ApiClient.collection("households").getOne(i.household)).address;
                             renderItems.push({
-                                household: i.household,
+                                householdId: i.household,
+                                household: householdAddress,
                                 gift_received: 1,
                                 id: renderItems.length + 1,
                             });
                         } else renderItems[index].gift_received++;
                     }
                     totalRecords = renderItems.length;
+                    console.log(renderItems)
 
                     //renderItems = renderItems.map(n => )
                     dispatch("load", records.concat(renderItems));
@@ -234,7 +237,7 @@
 
         let promises = [];
         for (const recordId of Object.keys(bulkSelected)) {
-            let selectedHousehold = bulkSelected[recordId].household;
+            let selectedHousehold = bulkSelected[recordId].householdId;
             let giftList = await ApiClient.collection("gift").getFullList(200, {
                 filter: "",
                 sort: "",
@@ -322,7 +325,7 @@
                     <SortHeader class="col-type-text col-field-id" name="id" bind:sort>
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon("primary")} />
-                            <span class="txt">id</span>
+                            <span class="txt">{CommonHelper.translateToVN("id")}</span>
                         </div>
                     </SortHeader>
                 {/if}
@@ -354,28 +357,10 @@
                     >
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{field.name}</span>
+                            <span class="txt">{CommonHelper.translateToVN(field.name)}</span>
                         </div>
                     </SortHeader>
                 {/each}
-
-                <!-- {#if !hiddenColumns.includes("@created")}
-                    <SortHeader class="col-type-date col-field-created" name="created" bind:sort>
-                        <div class="col-header-content">
-                            <i class={CommonHelper.getFieldTypeIcon("date")} />
-                            <span class="txt">created</span>
-                        </div>
-                    </SortHeader>
-                {/if}
-
-                {#if !hiddenColumns.includes("@updated")}
-                    <SortHeader class="col-type-date col-field-updated" name="updated" bind:sort>
-                        <div class="col-header-content">
-                            <i class={CommonHelper.getFieldTypeIcon("date")} />
-                            <span class="txt">updated</span>
-                        </div>
-                    </SortHeader>
-                {/if} -->
 
                 <th class="col-type-action min-width">
                     <button bind:this={columnsTrigger} type="button" class="btn btn-sm btn-secondary p-0">
@@ -460,18 +445,6 @@
                     {#each visibleFields as field (field.name)}
                         <RecordFieldCell {record} {field} />
                     {/each}
-
-                    <!-- {#if !hiddenColumns.includes("@created")}
-                        <td class="col-type-date col-field-created">
-                            <FormattedDate date={record.created} />
-                        </td>
-                    {/if}
-
-                    {#if !hiddenColumns.includes("@updated")}
-                        <td class="col-type-date col-field-updated">
-                            <FormattedDate date={record.updated} />
-                        </td>
-                    {/if} -->
 
                     <td class="col-type-action min-width">
                         <i class="ri-arrow-right-line" />

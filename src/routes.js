@@ -18,8 +18,6 @@ import PageAuthProviders     from "@/components/settings/PageAuthProviders.svelt
 import PageTokenOptions      from "@/components/settings/PageTokenOptions.svelte";
 import PageExportCollections from "@/components/settings/PageExportCollections.svelte";
 import PageImportCollections from "@/components/settings/PageImportCollections.svelte";
-import PageExportCollections from "@/components/settings/PageExportCollections.svelte";
-import PageImportCollections from "@/components/settings/PageImportCollections.svelte";
 import PageReward            from "./components/manage/PageReward.svelte";
 import PageRewardReport      from "./components/manage/PageRewardReport.svelte";
 import PageGift              from "./components/manage/PageGift.svelte";

@@ -53,6 +53,10 @@
     $: fields = collection?.schema || [];
 
     $: visibleFields = fields.filter((field) => !hiddenColumns.includes(field.id));
+    $: visibleFields.push({
+        name:"resident_name",
+        type: "text"
+    });
 
     $: totalBulkSelected = Object.keys(bulkSelected).length;
 
@@ -61,6 +65,7 @@
     $: if (hiddenColumns !== -1) {
         updateStoredHiddenColumns();
     }
+    $: console.log(records);
 
     $: collumnsToHide = [].concat(
         collection.isAuth
@@ -121,7 +126,6 @@
                 filter: filterHousehold,
             })
             .then(async (result) => {
-                console.trace();
                 if (page <= 1) {
                     clearList();
                 }
@@ -143,7 +147,15 @@
                             }
                             return false;
                         });
+                        for(let i of Object.keys(giftList)){
+                            let gift = giftList[i];
+                            let res = await ApiClient.collection("residents").getOne(gift.resident);
+                            gift.resident_name = res.name;
+                        }
                         totalRecords = giftList.length;
+                        console.log([...giftList]);
+
+                        
                         dispatch("load", records.concat(giftList));
 
                         // optimize the records listing by rendering the rows in task batches
@@ -161,6 +173,7 @@
                         } else {
                             records = records.concat(giftList);
                         }
+                        records = records;
                     });
             })
             .catch((err) => {
@@ -293,14 +306,14 @@
                     {/if}
                 </th>
 
-                {#if !hiddenColumns.includes("@id")}
+                <!-- {#if !hiddenColumns.includes("@id")}
                     <SortHeader class="col-type-text col-field-id" name="id" bind:sort>
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon("primary")} />
                             <span class="txt">id</span>
                         </div>
                     </SortHeader>
-                {/if}
+                {/if} -->
 
                 {#if collection.isAuth}
                     {#if !hiddenColumns.includes("@username")}
@@ -329,7 +342,7 @@
                     >
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{field.name}</span>
+                            <span class="txt">{CommonHelper.translateToVN(field.name)}</span>
                         </div>
                     </SortHeader>
                 {/each}
@@ -385,7 +398,7 @@
                         </div>
                     </td>
 
-                    {#if !hiddenColumns.includes("@id")}
+                    <!-- {#if !hiddenColumns.includes("@id")}
                         <td class="col-type-text col-field-id">
                             <div class="flex flex-gap-5">
                                 <IdLabel id={record.id} />
@@ -405,7 +418,7 @@
                                 {/if}
                             </div>
                         </td>
-                    {/if}
+                    {/if} -->
 
                     {#if collection.isAuth}
                         {#if !hiddenColumns.includes("@username")}

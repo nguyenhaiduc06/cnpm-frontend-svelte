@@ -7,6 +7,8 @@
 
     export let record;
     export let field;
+    
+    $: console.log(record.resident_name, record);
 
     // rough text cut to avoid rendering large chunk of texts
     function cutText(text) {

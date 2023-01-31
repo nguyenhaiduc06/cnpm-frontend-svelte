@@ -5,14 +5,20 @@
     const excludedMetaProps = ["id", "created", "updated", "collectionId", "collectionName"];
 
     export let item = {}; // model
-    export let metaField = "";
+    export let metaField = [];
 
     $: meta = extractMeta(item);
 
     function extractMeta(model) {
-        if (metaField != "") {
-            let res = model[metaField] || "";
-            return `${metaField}: ${res}`;
+        // if (metaField != "") {
+        //     let res = model[metaField] || "";
+        //     return `${metaField}: ${res}`;
+        // }
+        if(metaField && metaField.length > 0){
+            let txtList = metaField.map(x => `${x}: ${model[x] || ""}`);
+            let res = txtList.join(', ');
+            console.log(model);
+            return res;
         }
         model = model || {};
         const props = [

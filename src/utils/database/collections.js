@@ -458,7 +458,7 @@ export const CollectionGift = {
                 collectionId: "s4r3ipyouaoe4eo",
                 cascadeDelete: false,
                 unique: true,
-                metaField: "name",
+                metaField: ["name", "household"],
             },
         },
         {
@@ -466,7 +466,7 @@ export const CollectionGift = {
             type: "relation",
             options: {
                 maxSelect: 1,
-                metaField: "occasion",
+                metaField: ["occasion"],
                 collectionId: "pzgz9wrl4rk10kq",
                 cascadeDelete: false,
             },

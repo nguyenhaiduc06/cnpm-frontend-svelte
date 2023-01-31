@@ -66,7 +66,7 @@
         bind:filter
         bind:sort
         on:select={(e) =>
-            push(`/manage/gift-resident?household=${e.detail.household}&giftreport=${reportId}`)}
+            push(`/manage/gift-resident?household=${e.detail.householdId}&giftreport=${reportId}&occasion=${occasion}&year=${year}`)}
     />
 </PageWrapper>
 
