@@ -1,5 +1,5 @@
 <script>
-    import { querystring, replace } from "svelte-spa-router";
+    import { link, querystring, replace } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
@@ -66,13 +66,13 @@
             <i class="ri-history-line" />
             <span class="txt">Lịch sử thay đổi</span>
         </button>
-        <button type="button" class="btn btn-outline" on:click={() => addResidentFormPanel?.show()}>
+        <a class="btn btn-outline" href="/manage/residents/report" use:link>
             <i class="ri-pie-chart-line" />
             <span class="txt">Thống kê</span>
-        </button>
+        </a>
         <div class="flex-fill" />
         <button type="button" class="btn btn-outline" on:click={() => filterFormPanel.show()}>
-            <i class="ri-filter-line"  />
+            <i class="ri-filter-line" />
             <span class="txt">{householdId ? `Hộ khẩu ${householdId}` : "Tất cả hộ khẩu"}</span>
         </button>
     </div>

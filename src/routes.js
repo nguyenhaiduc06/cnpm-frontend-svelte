@@ -7,7 +7,8 @@ import PageRecords           from "@/components/records/PageRecords.svelte";
 import PageManage            from "@/components/manage/PageManage.svelte";
 import PageHouseholds        from "@/components/manage/PageHouseholds.svelte";
 import PageResidents         from "@/components/manage/PageResidents.svelte";
-import PageAbsent         from "@/components/manage/PageAbsent.svelte";
+import PageResidentsReport   from "./components/manage/PageResidentsReport.svelte";
+import PageAbsent            from "@/components/manage/PageAbsent.svelte";
 import PageTemporary         from "@/components/manage/PageTemporary.svelte";
 import PageAdmins            from "@/components/admins/PageAdmins.svelte";
 import PageAdminLogin        from "@/components/admins/PageAdminLogin.svelte";
@@ -70,6 +71,12 @@ const routes = {
 
     "/manage/residents": wrap({
         component:  PageResidents,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/manage/residents/report": wrap({
+        component: PageResidentsReport,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
