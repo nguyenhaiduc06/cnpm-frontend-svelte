@@ -1,24 +1,47 @@
 <script>
-    import { querystring } from "svelte-spa-router";
+    import { querystring, replace } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
-    import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import ResidentsList from "./ResidentsList.svelte";
-    import { CollectionHouseholds, CollectionResidentSnapshots } from "../../utils/database/collections";
+    import { CollectionResidentSnapshots } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
+    import Table from "../base/Table.svelte";
+    import { getResidents } from "@/services/api";
+    import { fly } from "svelte/transition";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: householdId = reactiveParams.get("householdId") || "";
 
-    let residentUpsertPanel;
-    let residentsList;
-    let householdUpsertPanel;
-    let householdSelectPanel;
-    let filter;
-    let sort;
+    let residentsTable;
+    let addResidentFormPanel;
+    let updateResidentFormPanel;
+    let addHouseholdFormPanel;
+    let selectHouseholdFormPanel;
+    let filterFormPanel;
 
-    $: filter = householdId ? `household ="${householdId}"` : "";
+    let residents;
+    let selectedResidents = {};
+    $: totalSelectedResidents = Object.keys(selectedResidents).length;
+
+    $: getResidents(householdId).then((result) => (residents = result));
+
+    function updateFilter(filter) {
+        const { household } = filter;
+        if (!household) {
+            return;
+        }
+        replace(`/manage/residents?householdId=${household}`);
+    }
+
+    function addResident(data) {}
+
+    function updateResident(data) {}
+
+    function changeHousehold(data) {}
+
+    function splitIntoNewHousehold(data) {}
+
+    function dead(data) {}
 </script>
 
 <ManageSidebar />
@@ -31,54 +54,101 @@
         </nav>
 
         <div class="inline-flex">
-            <RefreshButton on:refresh={() => residentsList?.load()} />
+            <RefreshButton on:refresh={() => residentsTable?.load()} />
         </div>
     </header>
     <div class="flex m-b-sm">
-        <button type="button" class="btn btn-outline" on:click={() => {}}>
-            {#if householdId}
-                <div class="breadcrumb-item">Hộ khẩu {householdId}</div>
-            {:else}
-                <span class="txt">Tất cả hộ khẩu</span>
-            {/if}
+        <button type="button" class="btn btn-expanded" on:click={() => addResidentFormPanel?.show()}>
+            <i class="ri-add-line" />
+            <span class="txt">Đăng kí thường trú</span>
+        </button>
+        <button type="button" class="btn btn-outline" on:click={() => addResidentFormPanel?.show()}>
+            <i class="ri-history-line" />
+            <span class="txt">Lịch sử thay đổi</span>
+        </button>
+        <button type="button" class="btn btn-outline" on:click={() => addResidentFormPanel?.show()}>
+            <i class="ri-pie-chart-line" />
+            <span class="txt">Thống kê</span>
         </button>
         <div class="flex-fill" />
-        <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => residentUpsertPanel?.show()}>
-                <i class="ri-add-line" />
-                <span class="txt">Đăng kí thường trú</span>
-            </button>
-        </div>
+        <button type="button" class="btn btn-outline" on:click={() => filterFormPanel.show()}>
+            <i class="ri-filter-line"  />
+            <span class="txt">{householdId ? `Hộ khẩu ${householdId}` : "Tất cả hộ khẩu"}</span>
+        </button>
     </div>
 
-    <ResidentsList
-        bind:this={residentsList}
-        bind:filter
-        bind:sort
-        on:select={(e) => residentUpsertPanel?.show(e?.detail)}
-        on:splitHousehold={(e) => householdUpsertPanel?.show()}
-        on:changeHousehold={(e) => householdSelectPanel?.show()}
+    <Table
+        records={residents}
+        fields={CollectionResidentSnapshots.schema.filter((s) => ["resident", "household"].includes(s.name))}
+        isLoading={false}
+        bind:bulkSelected={selectedResidents}
+        on:select={(e) => updateResidentFormPanel?.show(e.detail)}
     />
+
+    {#if totalSelectedResidents}
+        <div class="bulkbar" transition:fly|local={{ duration: 150, y: 5 }}>
+            <div class="txt">
+                Selected <strong>{totalSelectedResidents}</strong>
+                {totalSelectedResidents === 1 ? "record" : "records"}
+            </div>
+            <div class="flex-fill" />
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                on:click={() => addHouseholdFormPanel?.show()}
+            >
+                <span class="txt">Tách khẩu</span>
+            </button>
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary"
+                on:click={() => selectHouseholdFormPanel?.show()}
+            >
+                <span class="txt">Chuyển khẩu</span>
+            </button>
+            <button
+                type="button"
+                class="btn btn-sm btn-secondary btn-danger"
+                on:click={() => dead(selectedResidents)}
+            >
+                <span class="txt">Khai tử</span>
+            </button>
+        </div>
+    {/if}
 </PageWrapper>
 
-<RecordUpsertPanel
-    bind:this={residentUpsertPanel}
-    collection={CollectionResidentSnapshots}
-    on:save={() => residentsList?.reloadLoadedPages()}
-    on:delete={() => residentsList?.reloadLoadedPages()}
-/>
-
-<RecordUpsertPanel
-    bind:this={householdUpsertPanel}
-    collection={CollectionHouseholds}
-    on:save={() => residentsList?.reloadLoadedPages()}
-    on:delete={() => residentsList?.reloadLoadedPages()}
-    on:create={(e) => console.log("🚀 create record with data", e.detail.number)}
-    on:update={(e) => console.log("🚀 update record with data", e.detail)}
+<!-- update fields props to display necessary fields in form -->
+<FormPanel
+    bind:this={addResidentFormPanel}
+    title="Đăng kí thường trú"
+    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    on:submit={(e) => addResident(e.detail)}
 />
 
 <FormPanel
-    bind:this={householdSelectPanel}
-    on:submit={(e) => console.log('FormPanel submitted with data', e.detail)}
+    bind:this={updateResidentFormPanel}
+    title="Cập nhật thông tin nhân khẩu"
+    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    on:submit={(e) => updateResident(e.detail)}
+/>
+
+<FormPanel
+    bind:this={addHouseholdFormPanel}
+    title="Tạo hộ khẩu mới"
+    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    on:submit={(e) => splitIntoNewHousehold(e.detail)}
+/>
+
+<FormPanel
+    bind:this={selectHouseholdFormPanel}
+    title="Chọn hộ khẩu chuyển đến"
+    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    on:submit={(e) => changeHousehold(e.detail)}
+/>
+
+<FormPanel
+    bind:this={filterFormPanel}
+    title="Filter"
     fields={CollectionResidentSnapshots.schema.filter((field) => field.name == "household")}
+    on:submit={(e) => updateFilter(e.detail)}
 />
