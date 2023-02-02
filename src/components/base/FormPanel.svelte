@@ -17,7 +17,10 @@
     const dispatch = createEventDispatcher();
     const formId = "record_" + CommonHelper.randomString(5);
 
+    export let title;
     export let fields;
+    export let cancelLabel = "Cancel";
+    export let submitLabel = "Submit";
 
     let panel;
     let record = new Record();
@@ -26,18 +29,36 @@
 
     function submit() {
         dispatch("submit", record);
+        hide();
     }
 
-    export function show() {
+    export function show(model) {
+        console.log("🚀 ~ model", model)
+        load(model);
         panel?.show();
     }
 
     export function hide() {
         panel?.hide();
     }
+
+    async function load(model) {
+        if (model?.clone) {
+            record = model.clone();
+        } else {
+            record = new Record();
+        }
+        uploadedFilesMap = {};
+        deletedFileIndexesMap = {};
+    }
 </script>
 
 <OverlayPanel bind:this={panel} class="overlay-panel-lg record-panel" beforeHide={() => {}} on:hide on:show>
+    <svelte:fragment slot="header">
+        <h4>
+            <strong>{title}</strong>
+        </h4>
+    </svelte:fragment>
     <div class="tabs-content">
         <form id={formId} class="tab-item active" on:submit|preventDefault={submit}>
             {#each fields as field (field.name)}
@@ -74,7 +95,7 @@
 
     <svelte:fragment slot="footer">
         <button type="button" class="bth btn-secondary" disabled={false} on:click={() => hide()}>
-            <span class="txt">Cancel</span>
+            <span class="txt">{cancelLabel}</span>
         </button>
         <button
             type="submit"
@@ -83,7 +104,7 @@
             class:btn-loading={false}
             disabled={false}
         >
-            <span class="txt">Submit</span>
+            <span class="txt">{submitLabel}</span>
         </button>
     </svelte:fragment>
 </OverlayPanel>

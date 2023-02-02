@@ -19,7 +19,7 @@
             use:link
             use:active={{ path: "/manage/residents.*", className: "active" }}
         >
-            <span class="txt">Nhân khẩu</span>
+            <span class="txt">Thường trú</span>
         </a>
         <a
             href="/manage/absent"
