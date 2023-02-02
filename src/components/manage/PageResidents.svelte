@@ -7,6 +7,8 @@
     import ResidentsList from "./ResidentsList.svelte";
     import { CollectionHouseholds, CollectionResidentSnapshots } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
+    import ApiClient from "@/utils/ApiClient";
+
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: householdId = reactiveParams.get("householdId") || "";
@@ -19,6 +21,59 @@
     let sort;
 
     $: filter = householdId ? `household ="${householdId}"` : "";
+
+    function createResident(data) {
+        const residentSnapshotCollectionId = "s4r3ipyouaoe4eo";
+        ApiClient.collection(residentSnapshotCollectionId).create(data);
+    }
+
+    function updateResident({record, data}) {
+        const residentSnapshotCollectionId = "s4r3ipyouaoe4eo";
+        ApiClient.collection(residentSnapshotCollectionId).update(record.id, data);
+    }
+
+    function changeHousehold(data) {
+        
+    }
+
+    function splitHousehold(data) {
+        const bulkSelected = residentsList?.getSelectedList();
+        const residentSnapshotCollectionId = "s4r3ipyouaoe4eo";
+        const householdCollectionId = "f0ehmbvhv3tcp5w";
+        const residentChangesCollectionId = "068k7uz924d3mlf";
+
+        const request = ApiClient.collection(householdCollectionId).create(data);
+
+        for (const recordId of Object.keys(bulkSelected)) {
+            ApiClient.collection(residentSnapshotCollectionId).update(recordId, {
+                ...bulkSelected[recordId],
+                active: false
+            });
+        }
+
+        request
+            .then((result) => {
+                for (const recordId of Object.keys(bulkSelected)) {
+                    const residentSnapshotRequest = ApiClient.collection(residentSnapshotCollectionId).create({
+                        resident: bulkSelected[recordId].resident,
+                        note: bulkSelected[recordId].note,
+                        active: true,
+                        household: result.id
+                    });
+
+                    residentSnapshotRequest.then(residentSnapshotResult => {
+                        ApiClient.collection(residentChangesCollectionId).create({
+                            resident: bulkSelected[recordId].resident,
+                            old_household: bulkSelected[recordId].household,
+                            new_household: result.id,
+                            old_snapshot: recordId,
+                            new_snapshot: residentSnapshotResult.id,
+                            change_type: "split-household",
+                        });
+                    })
+                }
+            })
+    }
 </script>
 
 <ManageSidebar />
@@ -66,6 +121,8 @@
     collection={CollectionResidentSnapshots}
     on:save={() => residentsList?.reloadLoadedPages()}
     on:delete={() => residentsList?.reloadLoadedPages()}
+    on:create={(e) => createResident(e.detail)}
+    on:update={(e) => updateResident(e.detail)}
 />
 
 <RecordUpsertPanel
@@ -73,7 +130,7 @@
     collection={CollectionHouseholds}
     on:save={() => residentsList?.reloadLoadedPages()}
     on:delete={() => residentsList?.reloadLoadedPages()}
-    on:create={(e) => console.log("🚀 create record with data", e.detail.number)}
+    on:create={(e) => splitHousehold(e.detail)}
     on:update={(e) => console.log("🚀 update record with data", e.detail)}
 />
 

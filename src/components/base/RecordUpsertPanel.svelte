@@ -102,7 +102,7 @@
             dispatch("create", data);
         } else {
             // request = ApiClient.collection(collection.id).update(record.id, data);
-            dispatch("update", data);
+            dispatch("update", {record, data});
         }
 
         return;

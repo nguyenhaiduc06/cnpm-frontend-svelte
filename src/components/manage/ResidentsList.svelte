@@ -102,6 +102,10 @@
         }
     }
 
+    export function getSelectedList() {
+        return bulkSelected
+    }
+
     export async function load(page = 1, breakTasks = true) {
         if (!collection?.id) {
             return;
