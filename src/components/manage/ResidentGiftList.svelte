@@ -1,5 +1,6 @@
 <script>
     import { createEventDispatcher } from "svelte";
+    import { location } from "svelte-spa-router";
     import { fly } from "svelte/transition";
     import ApiClient from "@/utils/ApiClient";
     import CommonHelper from "@/utils/CommonHelper";
@@ -13,12 +14,17 @@
     import IdLabel from "@/components/base/IdLabel.svelte";
     import HorizontalScroller from "@/components/base/HorizontalScroller.svelte";
     import RecordFieldCell from "@/components/records/RecordFieldCell.svelte";
+    import { CollectionResidentSnapshots, CollectionGift } from "../../utils/database/collections";
 
     const dispatch = createEventDispatcher();
 
     export let collection;
     export let sort = "";
-    export let filter = "";
+    export let reportId = "";
+    export let household = "";
+
+    $: filterReport = `gift_report="${reportId}"`;
+    $: filterHousehold = `household="${household}"`;
 
     let records = [];
     let currentPage = 1;
@@ -30,14 +36,16 @@
     let columnsTrigger;
     let hiddenColumns = [];
     let collumnsToHide = [];
+    let giftCollectionId = CollectionGift.id;
+    let householdCollectionId = CollectionResidentSnapshots.id;
 
     $: if (collection?.id) {
         loadStoredHiddenColumns();
         clearList();
     }
 
-    $: if (collection?.id && sort !== -1 && filter !== -1) {
-        load(1);
+    $: if (collection?.id && sort !== -1 && filterHousehold !== -1) {
+        if ($location == "/manage/gift-resident") load(1);
     }
 
     $: canLoadMore = totalRecords > records.length;
@@ -45,6 +53,14 @@
     $: fields = collection?.schema || [];
 
     $: visibleFields = fields.filter((field) => !hiddenColumns.includes(field.id));
+    $: visibleFields.splice(1, 0, {
+        name:"resident_name",
+        type: "text"
+    });
+    $: visibleFields.splice(4, 0, {
+        name:"cost",
+        type: "number"
+    });
 
     $: totalBulkSelected = Object.keys(bulkSelected).length;
 
@@ -106,14 +122,11 @@
         }
 
         isLoading = true;
-        //for (const recordId of Object.keys(bulkSelected)) {
 
-        // }
-
-        return ApiClient.collection(collection.id)
+        return ApiClient.collection(householdCollectionId)
             .getList(page, 30, {
                 sort: sort,
-                filter: filter,
+                filter: filterHousehold,
             })
             .then(async (result) => {
                 if (page <= 1) {
@@ -121,25 +134,50 @@
                 }
                 isLoading = false;
                 currentPage = result.page;
-                totalRecords = result.totalItems;
+                //totalRecords = result.totalItems;
 
-                dispatch("load", records.concat(result.items));
-
-                // optimize the records listing by rendering the rows in task batches
-                if (breakTasks) {
-                    const currentYieldId = ++yieldedRecordsId;
-                    while (result.items.length) {
-                        if (yieldedRecordsId != currentYieldId) {
-                            break; // new yeild has been started
+                let householdResidents = [...result.items];
+                ApiClient.collection(giftCollectionId)
+                    .getFullList(200, {
+                        sort: "",
+                        filter: filterReport,
+                    })
+                    .then(async (res) => {
+                        let giftList = res;
+                        giftList = giftList.filter((n) => {
+                            for (let i of householdResidents) {
+                                if (i.resident == n.resident) return true;
+                            }
+                            return false;
+                        });
+                        for(let i of Object.keys(giftList)){
+                            let gift = giftList[i];
+                            let res = await ApiClient.collection("residents").getOne(gift.resident);
+                            gift.resident_name = res.name;
+                            gift.cost = gift.num_gift * CommonHelper.costPerGift;
                         }
+                        totalRecords = giftList.length;
 
-                        records = records.concat(result.items.splice(0, 15));
+                        
+                        dispatch("load", records.concat(giftList));
 
-                        await CommonHelper.yieldToMain();
-                    }
-                } else {
-                    records = records.concat(result.items);
-                }
+                        // optimize the records listing by rendering the rows in task batches
+                        if (breakTasks) {
+                            const currentYieldId = ++yieldedRecordsId;
+                            while (giftList.length) {
+                                if (yieldedRecordsId != currentYieldId) {
+                                    break; // new yeild has been started
+                                }
+
+                                records = records.concat(giftList.splice(0, 15));
+
+                                await CommonHelper.yieldToMain();
+                            }
+                        } else {
+                            records = records.concat(giftList);
+                        }
+                        records = records;
+                    });
             })
             .catch((err) => {
                 if (!err?.isAbort) {
@@ -271,14 +309,14 @@
                     {/if}
                 </th>
 
-                {#if !hiddenColumns.includes("@id")}
+                <!-- {#if !hiddenColumns.includes("@id")}
                     <SortHeader class="col-type-text col-field-id" name="id" bind:sort>
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon("primary")} />
                             <span class="txt">id</span>
                         </div>
                     </SortHeader>
-                {/if}
+                {/if} -->
 
                 {#if collection.isAuth}
                     {#if !hiddenColumns.includes("@username")}
@@ -363,7 +401,7 @@
                         </div>
                     </td>
 
-                    {#if !hiddenColumns.includes("@id")}
+                    <!-- {#if !hiddenColumns.includes("@id")}
                         <td class="col-type-text col-field-id">
                             <div class="flex flex-gap-5">
                                 <IdLabel id={record.id} />
@@ -383,7 +421,7 @@
                                 {/if}
                             </div>
                         </td>
-                    {/if}
+                    {/if} -->
 
                     {#if collection.isAuth}
                         {#if !hiddenColumns.includes("@username")}
@@ -441,11 +479,11 @@
                     <tr>
                         <td colspan="99" class="txt-center txt-hint p-xs">
                             <h6>No records found.</h6>
-                            {#if filter?.length}
+                            {#if filterHousehold?.length}
                                 <button
                                     type="button"
                                     class="btn btn-hint btn-expanded m-t-sm"
-                                    on:click={() => (filter = "")}
+                                    on:click={() => (filterHousehold = "")}
                                 >
                                     <span class="txt">Clear filters</span>
                                 </button>

@@ -1,4 +1,6 @@
 <script>
+    import { push, replace } from "svelte-spa-router";
+    import Searchbar from "@/components/base/Searchbar.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";

@@ -11,9 +11,8 @@ import { setAdmin }      from "@/stores/admin";
  *
  * @param {Boolean} [redirect] Whether to redirect to the login page.
  */
-PocketBase.prototype.logout = function(redirect = true) {
+ PocketBase.prototype.logout = function(redirect = true) {
     this.authStore.clear();
-
     if (redirect) {
         replace('/login');
     }
@@ -26,7 +25,7 @@ PocketBase.prototype.logout = function(redirect = true) {
  * @param  {Boolean} notify     Whether to add a toast notification.
  * @param  {String}  defaultMsg Default toast notification message if the error doesn't have one.
  */
-PocketBase.prototype.errorResponseHandler = function(err, notify = true, defaultMsg = '') {
+ PocketBase.prototype.errorResponseHandler = function(err, notify = true, defaultMsg = '') {
     if (!err || !(err instanceof Error) || err.isAbort) {
         return;
     }
@@ -86,11 +85,8 @@ class AppAuthStore extends LocalAuthStore {
     }
 }
 
-const client = new PocketBase(
-    "https://cnpm.fly.dev",
-    new AppAuthStore("pb_admin_auth")
-);
-console.log("🚀 ~ client", client)
+const client = new PocketBase("http://127.0.0.1:8090", new AppAuthStore("pb_admin_auth"));
+console.log("🚀 ~ client", client);
 
 if (client.authStore.model instanceof Admin) {
     setAdmin(client.authStore.model);
