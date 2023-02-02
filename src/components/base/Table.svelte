@@ -77,7 +77,7 @@
                     >
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{field.name}</span>
+                            <span class="txt">{field.label}</span>
                         </div>
                     </SortHeader>
                 {/each}
@@ -116,7 +116,8 @@
                     </td>
 
                     {#each fields as field (field.name)}
-                        <RecordFieldCell {record} {field} />
+                        <!-- <RecordFieldCell {record} {field} /> -->
+                        <td>{record[field.name]}</td>
                     {/each}
 
                     <td class="col-type-action min-width">

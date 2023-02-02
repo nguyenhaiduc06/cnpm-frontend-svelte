@@ -19,11 +19,26 @@
     let selectHouseholdFormPanel;
     let filterFormPanel;
 
+    let isLoading = true;
     let residents;
     let selectedResidents = {};
     $: totalSelectedResidents = Object.keys(selectedResidents).length;
 
-    $: getResidents(householdId).then((result) => (residents = result));
+    $: householdId, load();
+
+    function load() {
+        isLoading = true;
+        getResidents(householdId).then((result) => {
+            residents = result.map((record) => {
+                return {
+                    id: record.id,
+                    name: record.expand.resident?.name,
+                    household: record.household,
+                };
+            });
+            isLoading = false;
+        });
+    }
 
     function updateFilter(filter) {
         const { household } = filter;
@@ -41,7 +56,7 @@
 
     function splitIntoNewHousehold(data) {}
 
-    function dead(data) {}
+    function maskAsDead(data) {}
 </script>
 
 <ManageSidebar />
@@ -79,8 +94,17 @@
 
     <Table
         records={residents}
-        fields={CollectionResidentSnapshots.schema.filter((s) => ["resident", "household"].includes(s.name))}
-        isLoading={false}
+        fields={[
+            {
+                name: "name",
+                label: "Họ và tên",
+            },
+            {
+                name: "household",
+                label: "Hộ khẩu",
+            },
+        ]}
+        {isLoading}
         bind:bulkSelected={selectedResidents}
         on:select={(e) => updateResidentFormPanel?.show(e.detail)}
     />
@@ -109,7 +133,7 @@
             <button
                 type="button"
                 class="btn btn-sm btn-secondary btn-danger"
-                on:click={() => dead(selectedResidents)}
+                on:click={() => maskAsDead(selectedResidents)}
             >
                 <span class="txt">Khai tử</span>
             </button>

@@ -5,7 +5,7 @@ export async function getResidents(householdId) {
 
     const result = await ApiClient.collection("resident_snapshots").getFullList(200, {
         filter,
-        expand: "residents",
+        expand: "resident",
     });
 
     return result;
