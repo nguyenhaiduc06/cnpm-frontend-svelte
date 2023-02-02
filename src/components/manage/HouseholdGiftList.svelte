@@ -55,6 +55,10 @@
         },
     ];
     $: visibleFields = fields;
+    $: visibleFields.push({
+        name: "total_cost",
+        type: "number",
+    });
 
     $: totalBulkSelected = Object.keys(bulkSelected).length;
 
@@ -134,7 +138,7 @@
                 let promises = [];
                 for (let i of result.items) {
                     promises.push(
-                        ApiClient.collection("s4r3ipyouaoe4eo").getList(1, 1, {
+                        ApiClient.collection("resident_snapshots").getList(1, 1, {
                             sort: "",
                             filter: `resident="${i.resident}"`,
                             $autoCancel: false,
@@ -144,18 +148,28 @@
                 Promise.all(promises).then(async (res) => {
                     for (let i of res.map((n) => n.items[0])) {
                         let index = renderItems.findIndex((n) => n.householdId == i.household);
+                        let gift = result.items.find(x => x.resident == i.resident);
                         if (index < 0) {
-                            let householdAddress = (await ApiClient.collection("households").getOne(i.household)).address;
+                            let householdAddress = (
+                                await ApiClient.collection("households").getOne(i.household, {
+                                    $autoCancel: false
+                                })
+                            ).address;
+
                             renderItems.push({
                                 householdId: i.household,
                                 household: householdAddress,
                                 gift_received: 1,
                                 id: renderItems.length + 1,
+                                total_cost: gift ? gift.num_gift * CommonHelper.costPerGift : 0
                             });
-                        } else renderItems[index].gift_received++;
+                        } else {
+                            renderItems[index].gift_received++;
+                            renderItems[index].total_cost += gift ? gift.num_gift * CommonHelper.costPerGift : 0;
+                        };
                     }
                     totalRecords = renderItems.length;
-                    console.log(renderItems)
+                    console.log(renderItems);
 
                     //renderItems = renderItems.map(n => )
                     dispatch("load", records.concat(renderItems));
@@ -174,7 +188,6 @@
                         records = records.concat(renderItems);
                     }
                 });
-
             })
             .catch((err) => {
                 if (!err?.isAbort) {

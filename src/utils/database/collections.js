@@ -472,9 +472,13 @@ export const CollectionGift = {
             },
         },
         {
-            name: "cost",
+            name: "num_gift",
             type: "number",
         },
+        // {
+        //     name: "cost",
+        //     type: "number",
+        // },
     ],
     listRule: null,
     viewRule: null,

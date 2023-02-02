@@ -53,9 +53,13 @@
     $: fields = collection?.schema || [];
 
     $: visibleFields = fields.filter((field) => !hiddenColumns.includes(field.id));
-    $: visibleFields.push({
+    $: visibleFields.splice(1, 0, {
         name:"resident_name",
         type: "text"
+    });
+    $: visibleFields.splice(4, 0, {
+        name:"cost",
+        type: "number"
     });
 
     $: totalBulkSelected = Object.keys(bulkSelected).length;
@@ -151,6 +155,7 @@
                             let gift = giftList[i];
                             let res = await ApiClient.collection("residents").getOne(gift.resident);
                             gift.resident_name = res.name;
+                            gift.cost = gift.num_gift * CommonHelper.costPerGift;
                         }
                         totalRecords = giftList.length;
                         console.log([...giftList]);

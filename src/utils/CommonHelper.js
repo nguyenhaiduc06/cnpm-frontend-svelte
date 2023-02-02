@@ -32,6 +32,7 @@ export default class CommonHelper {
      * @param  {Mixed} value
      * @return {Boolean}
      */
+    static costPerGift = 4;
     static isObject(value) {
         return value !== null && typeof value === "object" && value.constructor === Object;
     }
