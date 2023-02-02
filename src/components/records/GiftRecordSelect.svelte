@@ -171,7 +171,6 @@
             list = CommonHelper.filterDuplicatesByKey(
                 list.concat(result.items, CommonHelper.toArray(selected))
             );
-            console.log(list);
             currentPage = result.page;
             totalItems = result.totalItems;
         } catch (err) {

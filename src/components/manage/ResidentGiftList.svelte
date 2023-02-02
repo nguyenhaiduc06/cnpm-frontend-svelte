@@ -69,7 +69,6 @@
     $: if (hiddenColumns !== -1) {
         updateStoredHiddenColumns();
     }
-    $: console.log(records);
 
     $: collumnsToHide = [].concat(
         collection.isAuth
@@ -158,7 +157,6 @@
                             gift.cost = gift.num_gift * CommonHelper.costPerGift;
                         }
                         totalRecords = giftList.length;
-                        console.log([...giftList]);
 
                         
                         dispatch("load", records.concat(giftList));

@@ -36,7 +36,6 @@
         ensureSelectedExist();
         resetSearch();
     }
-    $: console.log(items);
     $: filteredItems = filterItems(items, searchTerm);
 
     $: isSelected = function (item) {
@@ -70,7 +69,6 @@
             }
         } else {
             selected = items;
-            console.log(tmpItems);
         }
 
         // emulate native change event
@@ -268,7 +266,6 @@
             <div class="options-list">
                 <RelationSearchBar searchField="name" on:submit = {(e) => {
                     filter = e.detail
-                    console.log(items);
                     items = tmpItems.filter(x => filter.value == "" || x[filter.field].includes(filter.value))
                 }}/>
                 {#each filteredItems as item}

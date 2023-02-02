@@ -22,7 +22,6 @@
 
     $: if (typeof value === "string") {
         tempValue = value;
-        console.log(value);
     }
 
     function clear(focusInput = true) {
@@ -35,7 +34,6 @@
 
     function submit() {
         value = tempValue;
-        console.log(value);
         dispatch("submit", {field: searchField, value});
     }
 

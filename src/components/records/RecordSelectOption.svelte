@@ -17,7 +17,6 @@
         if(metaField && metaField.length > 0){
             let txtList = metaField.map(x => `${x}: ${model[x] || ""}`);
             let res = txtList.join(', ');
-            console.log(model);
             return res;
         }
         model = model || {};
