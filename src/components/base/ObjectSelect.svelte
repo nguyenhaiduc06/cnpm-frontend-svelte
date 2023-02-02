@@ -9,7 +9,8 @@
     export let selected = multiple ? [] : undefined;
     export let labelComponent = BaseSelectOption; // custom component to use for each selected option label
     export let optionComponent = BaseSelectOption; // custom component to use for each dropdown option item
-
+    export let selectComponent = Select;
+    
     // custom props
     export let selectionKey = "value";
     export let keyOfSelected = multiple ? [] : undefined;
@@ -49,8 +50,13 @@
     }
 </script>
 
-<Select bind:selected {items} {multiple} {labelComponent} {optionComponent} on:show on:hide {...$$restProps}>
+<!-- <Select bind:selected {items} {multiple} {labelComponent} {optionComponent} on:show on:hide {...$$restProps}>
     <svelte:fragment slot="afterOptions">
         <slot name="afterOptions" />
     </svelte:fragment>
-</Select>
+</Select> -->
+<svelte:component this={selectComponent} bind:selected {items} {multiple} {labelComponent} {optionComponent} on:show on:hide {...$$restProps}>
+    <svelte:fragment slot="afterOptions">
+        <slot name="afterOptions" />
+    </svelte:fragment>
+</svelte:component>

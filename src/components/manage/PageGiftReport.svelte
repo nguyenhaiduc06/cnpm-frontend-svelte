@@ -8,6 +8,7 @@
     import ManageSidebar from "./ManageSidebar.svelte";
     import { CollectionGiftReport } from "../../utils/database/collections";
     import GiftList from "./HouseholdGiftList.svelte";
+    import GiftReportSearchBar from "../base/GiftReportSearchBar.svelte";
 
     let filter;
     let reportList;
@@ -37,9 +38,9 @@
             </button>
         </div>
     </div>
-    <Searchbar
-        value={filter}
+    <GiftReportSearchBar
         autocompleteCollection={CollectionGiftReport}
+        searchField = "occasion"
         on:submit={(e) => (filter = e.detail)}
     />
 

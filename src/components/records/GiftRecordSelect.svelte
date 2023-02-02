@@ -5,6 +5,7 @@
     import RecordSelectOption from "./RecordSelectOption.svelte";
     import RecordUpsertPanel from "@/components/records/RecordUpsertPanel.svelte";
     import { querystring } from "svelte-spa-router";
+    import GiftSelect from "../base/GiftSelect.svelte";
 
     const uniqueId = "select_" + CommonHelper.randomString(5);
 
@@ -184,9 +185,11 @@
 <ObjectSelect
     selectPlaceholder={isLoading ? "Loading..." : selectPlaceholder}
     items={list}
+    tmpItems={list}
     searchable={list.length > 5}
     selectionKey="id"
     labelComponent={optionComponent}
+    selectComponent = {GiftSelect}
     labelComponentProps={{
         metaField: labelMetaField,
     }}
