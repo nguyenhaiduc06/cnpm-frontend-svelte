@@ -134,7 +134,7 @@
                 {:else}
                     <tr>
                         <td colspan="99" class="txt-center txt-hint p-xs">
-                            <h6>No records found.</h6>
+                            <h6>Không có dữ liệu</h6>
                             {#if filter?.length}
                                 <button
                                     type="button"
@@ -153,5 +153,5 @@
 </HorizontalScroller>
 
 {#if records.length}
-    <small class="block txt-hint txt-right m-t-sm">Showing {records.length} records</small>
+    <small class="block txt-hint txt-right m-t-sm">Đang hiển thị {records.length} kết quả</small>
 {/if}
