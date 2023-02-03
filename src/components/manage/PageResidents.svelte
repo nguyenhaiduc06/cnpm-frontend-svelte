@@ -3,11 +3,12 @@
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import { CollectionResidentSnapshots } from "../../utils/database/collections";
+    import { CollectionResidents, CollectionResidentSnapshots } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import { fly } from "svelte/transition";
+    import { addErrorToast, addSuccessToast } from "@/stores/toasts";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: householdId = reactiveParams.get("householdId") || "";
@@ -30,10 +31,18 @@
         isLoading = true;
         Api.getResidents(householdId).then((result) => {
             residents = result.map((record) => {
+                const { id, relation_with_householder } = record;
+                const { resident, household } = record.expand;
+                const { name, birthday, citizen_id } = resident ?? {};
+                const { number, address } = household ?? {};
                 return {
-                    id: record.id,
-                    name: record.expand.resident?.name,
-                    household: record.household,
+                    id,
+                    name,
+                    birthday,
+                    number,
+                    address,
+                    citizen_id,
+                    relation_with_householder,
                 };
             });
             isLoading = false;
@@ -48,7 +57,23 @@
         replace(`/manage/residents?householdId=${household}`);
     }
 
-    function addResident(data) {}
+    async function registerPermanent(data) {
+        const { name, birthday, gender, citizen_id, household, relation_with_householder } = data;
+        try {
+            const resident = await Api.createResident({ name, birthday, gender, citizen_id });
+            await Api.createResidentSnapshot({
+                resident: resident.id,
+                household,
+                relation_with_householder,
+                alive: true,
+                note: "",
+                active: true,
+            });
+            addSuccessToast(`Đã đăng kí thường trú thành công cho ${name}`);
+        } catch (e) {
+            addErrorToast(e.message);
+        }
+    }
 
     function updateResident(data) {}
 
@@ -96,12 +121,28 @@
         records={residents}
         fields={[
             {
+                name: "citizen_id",
+                label: "CCCD",
+            },
+            {
                 name: "name",
                 label: "Họ và tên",
             },
             {
-                name: "household",
-                label: "Hộ khẩu",
+                name: "birthday",
+                label: "Ngày sinh",
+            },
+            {
+                name: "number",
+                label: "Hộ khẩu số",
+            },
+            {
+                name: "address",
+                label: "Địa chỉ",
+            },
+            {
+                name: "relation_with_householder",
+                label: "Quan hệ với chủ hộ",
             },
         ]}
         {isLoading}
@@ -145,8 +186,15 @@
 <FormPanel
     bind:this={addResidentFormPanel}
     title="Đăng kí thường trú"
-    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
-    on:submit={(e) => addResident(e.detail)}
+    fields={[
+        ...CollectionResidents.schema.filter((s) =>
+            ["name", "birthday", "gender", "citizen_id"].includes(s.name)
+        ),
+        ...CollectionResidentSnapshots.schema.filter((s) =>
+            ["household", "relation_with_householder"].includes(s.name)
+        ),
+    ]}
+    on:submit={(e) => registerPermanent(e.detail)}
 />
 
 <FormPanel

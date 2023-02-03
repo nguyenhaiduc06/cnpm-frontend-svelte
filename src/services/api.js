@@ -6,10 +6,18 @@ export class Api {
 
         const result = await ApiClient.collection("resident_snapshots").getFullList(200, {
             filter,
-            expand: "resident",
+            expand: "resident, household",
         });
 
         return result;
+    }
+
+    static async createResident(data) {
+        return ApiClient.collection("residents").create(data);
+    }
+
+    static async createResidentSnapshot(data) {
+        return ApiClient.collection("resident_snapshots").create(data);
     }
 
     static async getHouseholds() {
