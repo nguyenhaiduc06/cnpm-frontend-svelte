@@ -6,7 +6,7 @@
     import { CollectionResidentSnapshots } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import Table from "../base/Table.svelte";
-    import { getResidents } from "@/services/api";
+    import { Api } from "@/services/api";
     import { fly } from "svelte/transition";
 
     $: reactiveParams = new URLSearchParams($querystring);
@@ -28,7 +28,7 @@
 
     function load() {
         isLoading = true;
-        getResidents(householdId).then((result) => {
+        Api.getResidents(householdId).then((result) => {
             residents = result.map((record) => {
                 return {
                     id: record.id,
@@ -65,7 +65,7 @@
     <header class="page-header">
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
-            <div class="breadcrumb-item">Nhân khẩu</div>
+            <div class="breadcrumb-item">Thường trú</div>
         </nav>
 
         <div class="inline-flex">
