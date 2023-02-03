@@ -14,7 +14,7 @@
             <span class="txt">Hộ khẩu</span>
         </a>
         <a
-            href="/manage/residents"
+            href="/manage/permanent"
             class="sidebar-list-item"
             use:link
             use:active={{ path: "/manage/residents.*", className: "active" }}
