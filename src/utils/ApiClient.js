@@ -85,8 +85,7 @@ class AppAuthStore extends LocalAuthStore {
     }
 }
 
-const client = new PocketBase("http://127.0.0.1:8090", new AppAuthStore("pb_admin_auth"));
-console.log("🚀 ~ client", client);
+const client = new PocketBase("https://cnpm.fly.dev/", new AppAuthStore("pb_admin_auth"));
 
 if (client.authStore.model instanceof Admin) {
     setAdmin(client.authStore.model);
