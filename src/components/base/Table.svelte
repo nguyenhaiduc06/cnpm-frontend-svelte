@@ -76,7 +76,7 @@
                         bind:sort
                     >
                         <div class="col-header-content">
-                            <i class={CommonHelper.getFieldTypeIcon(field.type)} />
+                            <!-- <i class={CommonHelper.getFieldTypeIcon(field.type)} /> -->
                             <span class="txt">{field.label}</span>
                         </div>
                     </SortHeader>
