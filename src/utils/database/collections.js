@@ -72,6 +72,28 @@ export const CollectionResidentSnapshots = {
             },
         },
         {
+            id: "sbms1kin",
+            name: "relation_with_householder",
+            type: "text",
+            system: false,
+            required: false,
+            unique: false,
+            options: {
+                min: null,
+                max: null,
+                pattern: "",
+            },
+        },
+        {
+            id: "jesc1tln",
+            name: "alive",
+            type: "bool",
+            system: false,
+            required: false,
+            unique: false,
+            options: {},
+        },
+        {
             id: "fckyyucj",
             name: "note",
             type: "text",
@@ -89,7 +111,7 @@ export const CollectionResidentSnapshots = {
             name: "active",
             type: "bool",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {},
         },
@@ -212,6 +234,30 @@ export const CollectionResidents = {
             },
         },
         {
+            id: "9q40mpb0",
+            name: "birthday",
+            type: "date",
+            system: false,
+            required: false,
+            unique: false,
+            options: {
+                min: "",
+                max: "",
+            },
+        },
+        {
+            id: "tyeeavgs",
+            name: "gender",
+            type: "select",
+            system: false,
+            required: true,
+            unique: false,
+            options: {
+                maxSelect: 1,
+                values: ["nam", "nữ"],
+            },
+        },
+        {
             id: "731lkoeq",
             name: "citizen_id",
             type: "text",
@@ -225,20 +271,8 @@ export const CollectionResidents = {
             },
         },
         {
-            id: "9q40mpb0",
-            name: "birthday",
-            type: "date",
-            system: false,
-            required: false,
-            unique: false,
-            options: {
-                min: "",
-                max: "",
-            },
-        },
-        {
-            id: "cnupnmd9",
-            name: "birthplace",
+            id: "czdzqcq2",
+            name: "job",
             type: "text",
             system: false,
             required: false,
@@ -250,8 +284,8 @@ export const CollectionResidents = {
             },
         },
         {
-            id: "czdzqcq2",
-            name: "job",
+            id: "cnupnmd9",
+            name: "birthplace",
             type: "text",
             system: false,
             required: false,
@@ -340,6 +374,145 @@ export const CollectionTemporaryResidents = {
                 cascadeDelete: false,
             },
         },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionRewardReport = {
+    id: "5sela3i08hhb9u8",
+    name: "Reward Reports",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "name",
+            type: "text",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionReward = {
+    id: "b2eiamk7yp7jby7",
+    name: "Rewards",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "resident",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "gabzhpa0gwujotf",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "reward_report",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "5sela3i08hhb9u8",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "school",
+            type: "text",
+        },
+        {
+            name: "class",
+            type: "text",
+        },
+        {
+            name: "grade",
+            type: "number",
+        },
+        {
+            name: "education_result",
+            type: "select",
+            options: {
+                maxSelect: 1,
+                values: ["Excellent", "Good", "Average", "Bad"],
+            },
+        },
+        {
+            name: "education_proof",
+            type: "file",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionGiftReport = {
+    id: "pzgz9wrl4rk10kq",
+    name: "Reward Reports",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "occasion",
+            type: "text",
+        },
+        {
+            name: "year",
+            type: "text",
+        },
+    ],
+    listRule: null,
+    viewRule: null,
+    createRule: null,
+    updateRule: null,
+    deleteRule: null,
+    options: {},
+};
+export const CollectionGift = {
+    id: "50lx5fxhb96g1oz",
+    name: "Rewards",
+    type: "base",
+    system: false,
+    schema: [
+        {
+            name: "resident",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "s4r3ipyouaoe4eo",
+                cascadeDelete: false,
+                unique: true,
+                metaField: ["name", "household"],
+            },
+        },
+        {
+            name: "gift_report",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                metaField: ["occasion"],
+                collectionId: "pzgz9wrl4rk10kq",
+                cascadeDelete: false,
+            },
+        },
+        {
+            name: "num_gift",
+            type: "number",
+        },
+        // {
+        //     name: "cost",
+        //     type: "number",
+        // },
     ],
     listRule: null,
     viewRule: null,

@@ -7,6 +7,7 @@
 
     export let record;
     export let field;
+    
 
     // rough text cut to avoid rendering large chunk of texts
     function cutText(text) {

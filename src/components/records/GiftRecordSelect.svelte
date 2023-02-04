@@ -4,20 +4,30 @@
     import ObjectSelect from "@/components/base/ObjectSelect.svelte";
     import RecordSelectOption from "./RecordSelectOption.svelte";
     import RecordUpsertPanel from "@/components/records/RecordUpsertPanel.svelte";
+    import { querystring } from "svelte-spa-router";
+    import GiftSelect from "../base/GiftSelect.svelte";
 
     const uniqueId = "select_" + CommonHelper.randomString(5);
 
-    // original select props
+    // original select props 
     export let multiple = false;
     export let selected = [];
     export let keyOfSelected = multiple ? [] : undefined;
     export let selectPlaceholder;
     export let disable = false;
+    export let unique = "";
+    export let labelMetaField;
+    export let optionMetaField;
     export let optionComponent = RecordSelectOption; // custom component to use for each dropdown option item
+
+    let selectComponent = () => {};
 
     // custom props
     export let collectionId;
+    export let filter;
     $: keyOfSelected = disable ? selectPlaceholder : keyOfSelected;
+    $: reactiveParams = new URLSearchParams($querystring);
+    $: reportId = reactiveParams.get("giftreport") || "";
 
     let list = [];
     let currentPage = 1;
@@ -50,6 +60,7 @@
 
         try {
             collection = await ApiClient.collections.getOne(collectionId, {
+                filter: filter,
                 $cancelKey: "collection_" + uniqueId,
             });
         } catch (err) {
@@ -122,13 +133,41 @@
 
             const result = await ApiClient.collection(collectionId).getList(page, 200, {
                 sort: "-created",
+                filter: filter,
                 $cancelKey: uniqueId + "loadList",
             });
 
             if (reset) {
                 list = CommonHelper.toArray(selected).slice();
             }
+            if (unique && unique.length > 0) {
+                const giftList = await ApiClient.collection("gift").getList(1, 200, {
+                    sort: "",
+                    filter: `gift_report="${reportId}"`,
+                });
 
+                const existedItems = giftList.items.map((x) => x[unique]);
+                result.items = result.items.filter((x) => !existedItems.includes(x.resident));
+                result.items.map((x) => (x.id = x.resident));
+                
+                // result.items.map(async (x) => {
+                //     const resident = await ApiClient.collection("residents").getOne(x.id, {
+                //         $$autoCancel: false
+                //     });
+                //     x.name = resident.name;
+                // });
+                for(let x of result.items){
+                    const resident = await ApiClient.collection("residents").getOne(x.id, {
+                        $autoCancel: false
+                    });
+                    const snapshot = await ApiClient.collection("resident_snapshots").getFullList(1, {
+                        filter:`resident="${x.id}"`, $autoCancel: false
+                    })
+                    x.name = resident.name;
+                    x.household = snapshot[0].household;
+                    //console.log(snap)
+                }   
+            }  
             list = CommonHelper.filterDuplicatesByKey(
                 list.concat(result.items, CommonHelper.toArray(selected))
             );
@@ -145,9 +184,17 @@
 <ObjectSelect
     selectPlaceholder={isLoading ? "Loading..." : selectPlaceholder}
     items={list}
+    tmpItems={list}
     searchable={list.length > 5}
     selectionKey="id"
     labelComponent={optionComponent}
+    selectComponent = {GiftSelect}
+    labelComponentProps={{
+        metaField: labelMetaField,
+    }}
+    optionComponentProps={{
+        metaField: optionMetaField,
+    }}
     disabled={isLoading || disable}
     {optionComponent}
     {multiple}

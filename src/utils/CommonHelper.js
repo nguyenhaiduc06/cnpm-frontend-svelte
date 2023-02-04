@@ -1,5 +1,30 @@
 import { DateTime } from "luxon";
 
+const dictionary = {
+    number: "Số hộ khẩu",
+    address: "Địa chỉ",
+    resident: "Nhân khẩu",
+    household: "Hộ khẩu",
+    active: "Trạng thái",
+    created: "Ngày tạo",
+    updated: "Ngày cập nhật",
+    gift_report: "Dịp",
+    occasion: "Dịp",
+    num_gift: "Số quà",
+    gift_received: "Số thành viên nhận quà",
+    cost: "Chi phí",
+    total_cost: "Tổng chi phí",
+    year: "Năm",
+    name: "Tên",
+    resident_name: "Tên nhân khẩu",
+    school: "Trường",
+    class: "Lớp",
+    grade: "Khối",
+    reward_report: "Thống kê khen thưởng",
+    education_result: "Kết quả học tập",
+    education_proof: "Minh chứng kết quả",
+}
+
 export default class CommonHelper {
     /**
      * Checks whether value is plain object.
@@ -7,8 +32,12 @@ export default class CommonHelper {
      * @param  {Mixed} value
      * @return {Boolean}
      */
+    static costPerGift = 4;
     static isObject(value) {
         return value !== null && typeof value === "object" && value.constructor === Object;
+    }
+    static translateToVN(word){
+        return dictionary[word] || word;
     }
 
     /**

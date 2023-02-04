@@ -1,17 +1,50 @@
 <script>
-    import { replace } from "svelte-spa-router";
-    import Searchbar from "@/components/base/Searchbar.svelte";
-    import RefreshButton from "@/components/base/RefreshButton.svelte";
-    import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
-    import RecordsList from "@/components/records/RecordsList.svelte";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import { CollectionHouseholds } from "../../utils/database/collections";
+    import Table from "../base/Table.svelte";
+    import FormPanel from "../base/FormPanel.svelte";
+    import { Api } from "@/services/api";
+    import { addErrorToast, addSuccessToast } from "@/stores/toasts";
+    import BulkBar from "../base/BulkBar.svelte";
 
-    let householdsList;
-    let filter;
-    let sort;
-    let householdUpsertPanel;
+    let addHouseholdFormPanel;
+
+    let isLoading;
+    let households;
+    let selectedHouseholds = {};
+
+    load();
+
+    async function load() {
+        isLoading = true;
+        households = await Api.getHouseholds();
+        isLoading = false;
+    }
+
+    async function addHousehold(data) {
+        try {
+            await Api.createHousehold(data);
+            addSuccessToast(`Đã thêm hộ khẩu số ${data.number}`);
+            load();
+        } catch (e) {
+            addErrorToast(e.message);
+        } finally {
+        }
+    }
+
+    async function deleteSelectedHouseholds() {
+        const households = Object.values(selectedHouseholds);
+        const deleteTasks = households.map((household) => Api.deleteHousehold(household));
+        selectedHouseholds = {};
+        Promise.all(deleteTasks)
+            .then(() => {
+                load();
+            })
+            .catch((e) => {
+                addErrorToast(e.message);
+            });
+    }
 </script>
 
 <ManageSidebar />
@@ -19,41 +52,47 @@
 <PageWrapper>
     <header class="page-header">
         <nav class="breadcrumbs">
-            <div class="breadcrumb-item">Collections</div>
-            <div class="breadcrumb-item">{CollectionHouseholds.name}</div>
+            <div class="breadcrumb-item">Quản lý</div>
+            <div class="breadcrumb-item">Hộ khẩu</div>
         </nav>
-
-        <div class="inline-flex gap-5">
-            <RefreshButton on:refresh={() => householdsList?.load()} />
-        </div>
     </header>
     <div class="flex m-b-sm">
+        <button type="button" class="btn btn-expanded" on:click={() => addHouseholdFormPanel?.show()}>
+            <i class="ri-add-line" />
+            <span class="txt">Nhập sổ hộ khẩu</span>
+        </button>
         <div class="flex-fill" />
-        <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => householdUpsertPanel?.show()}>
-                <i class="ri-add-line" />
-                <span class="txt">Hộ khẩu mới</span>
-            </button>
-        </div>
+        <button type="button" class="btn btn-outline" on:click={() => {}}>
+            <i class="ri-filter-line" />
+            <span class="txt">Lọc</span>
+        </button>
     </div>
-    <Searchbar
-        value={filter}
-        autocompleteCollection={CollectionHouseholds}
-        on:submit={(e) => (filter = e.detail)}
+
+    <Table
+        records={households}
+        fields={[
+            {
+                name: "number",
+                label: "Số",
+            },
+            {
+                name: "address",
+                label: "Địa chỉ",
+            },
+        ]}
+        {isLoading}
+        bind:bulkSelected={selectedHouseholds}
     />
 
-    <RecordsList
-        bind:this={householdsList}
-        collection={CollectionHouseholds}
-        bind:filter
-        bind:sort
-        on:select={(e) => replace("/manage/residents?householdId=" + e.detail.id)}
+    <BulkBar
+        bulkSelected={selectedHouseholds}
+        actions={[{ label: "Xóa", onClick: deleteSelectedHouseholds, isDanger: true }]}
     />
 </PageWrapper>
 
-<RecordUpsertPanel
-    bind:this={householdUpsertPanel}
-    collection={CollectionHouseholds}
-    on:save={() => householdsList?.reloadLoadedPages()}
-    on:delete={() => householdsList?.reloadLoadedPages()}
+<FormPanel
+    bind:this={addHouseholdFormPanel}
+    title="Nhập sổ hộ khẩu"
+    fields={CollectionHouseholds.schema.filter((s) => ["number", "address"].includes(s.name))}
+    on:submit={(e) => addHousehold(e.detail)}
 />
