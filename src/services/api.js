@@ -11,6 +11,12 @@ export class Api {
 
         return result;
     }
+    static async getAllResidents(){
+        const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
+            expand: "resident, household",
+        });
+        return records;
+    }
 
     static async createResident(data) {
         return ApiClient.collection("residents").create(data);
@@ -43,5 +49,15 @@ export class Api {
     }
     static async deleteGiftReport(report){
         await ApiClient.collection("gift_report").delete(report.id);
+    }
+    static async getGifts(reportId){
+        const records = await ApiClient.collection("gift").getFullList(200, {
+            filter: `gift_report="${reportId}"`
+        })
+        return records;
+    }
+    static async deleteGift(giftId){
+        const result = await ApiClient.collection("gift").delete(giftId);
+        return result;
     }
 }
