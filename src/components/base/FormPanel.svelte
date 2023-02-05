@@ -21,6 +21,7 @@
     export let fields;
     export let cancelLabel = "Cancel";
     export let submitLabel = "Submit";
+    export let excludedFields = {};
 
     let panel;
     let record = new Record();
@@ -87,7 +88,8 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    <RelationField {field} bind:value={record[field.name]} />
+                    {console.log(field.name, record[field.name]) || ""}
+                    <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]}/>
                 {/if}
             {/each}
         </form>

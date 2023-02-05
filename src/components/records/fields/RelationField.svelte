@@ -24,13 +24,14 @@
         <i class={CommonHelper.getFieldTypeIcon(field.type)} />
         <span class="txt">{field.name}</span>
     </label>
+    {console.log(value) || ""}
     <RecordSelect
         toggle
-        disable={excluded.state}
-        defaultValue={excluded.defaultValue}
+        disable={excluded}
+        defaultVal={excluded.defaultVal}
         id={uniqueId}
         multiple={isMultiple}
-        selectPlaceholder={excluded.state ? excluded.defaultVal : "- Select -"}
+        selectPlaceholder={excluded && excluded.defaultVal ? excluded.defaultVal : "- Select -"}
         collectionId={field.options?.collectionId}
         bind:keyOfSelected={value}
     />

@@ -13,11 +13,12 @@
     export let keyOfSelected = multiple ? [] : undefined;
     export let selectPlaceholder;
     export let disable = false;
+    export let defaultVal = "";
     export let optionComponent = RecordSelectOption; // custom component to use for each dropdown option item
 
     // custom props
     export let collectionId;
-    $: keyOfSelected = disable ? selectPlaceholder : keyOfSelected;
+    $: keyOfSelected = disable && defaultVal ? selectPlaceholder : keyOfSelected;
 
     let list = [];
     let currentPage = 1;

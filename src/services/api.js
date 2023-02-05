@@ -70,4 +70,7 @@ export class Api {
         const result = await ApiClient.collection("gift").delete(giftId);
         return result;
     }
+    static async updateGift(giftId, data){
+        await ApiClient.collection("gift").update(giftId, data);
+    }
 }
