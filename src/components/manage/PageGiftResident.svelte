@@ -11,20 +11,19 @@
     import { Api } from "@/services/api";
     import Table from "../base/Table.svelte";
     import CommonHelper from "@/utils/CommonHelper";
-    
-    
+    import BulkBar from "../base/BulkBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("giftreport") || "";
     $: year = reactiveParams.get("year") || "";
     $: occasion = reactiveParams.get("occasion") || "";
     $: household = reactiveParams.get("household") || "";
-    
+
     let residentUpsertPanel;
     let residentsList;
     let giftSelectPanel;
     let filter;
-    let selectedRecords;
+    let selectedRecords = [];
 
     $: giftResidents = [];
     $: residents_snaps = [];
@@ -39,23 +38,35 @@
         occasion = reactiveParams.get("occasion") || "";
         household = reactiveParams.get("household") || "";
         isLoading = true;
-        
+
         giftResidents = await Api.getGifts(reportId);
-        residents_snaps = (await Api.getAllResidents()).filter((x) =>
-            giftResidents.find((n) => n.resident == x.resident) && x.household == household
+        residents_snaps = (await Api.getAllResidents()).filter(
+            (x) => giftResidents.find((n) => n.resident == x.resident) && x.household == household
         );
-        
-        giftResidents = giftResidents.filter(x => residents_snaps.find(n => n.resident == x.resident));
-        for(let gift of giftResidents){
+
+        giftResidents = giftResidents.filter((x) => residents_snaps.find((n) => n.resident == x.resident));
+        for (let gift of giftResidents) {
             let residentName = (await Api.getResidentInfo(gift.resident, false)).name;
             gift.residentName = residentName;
             gift.cost = gift.num_gift * CommonHelper.costPerGift;
             gift.occasion = occasion;
         }
-        
+
         isLoading = false;
-        console.log(giftResidents);      
-        giftResidents = giftResidents 
+        console.log(giftResidents);
+        giftResidents = giftResidents;
+    }
+    async function deleteSelected(){
+        const gifts = Object.values(selectedRecords);
+        const deleteTasks = gifts.map((x) => Api.deleteGift(x.id));
+        selectedRecords = {};
+        Promise.all(deleteTasks)
+            .then(() => {
+                load();
+            })
+            .catch((e) => {
+                addErrorToast(e.message);
+            });
     }
 </script>
 
@@ -90,37 +101,30 @@
             </button>
         </div>
     </div>
-
-    <!-- <ResidentGiftList
-        bind:this={rewardList}
-        collection={CollectionGift}
-        {reportId}
-        {household}
-        on:select={(e) => residentUpsertPanel?.show(e?.detail)}
-    /> -->
-    <Table 
-        records = {giftResidents}
-        fields = {[
+    <Table
+        records={giftResidents}
+        fields={[
             {
                 name: "residentName",
-                label: "Tên nhân khẩu"
+                label: "Tên nhân khẩu",
             },
             {
                 name: "num_gift",
-                label: "Số quà nhận"
+                label: "Số quà nhận",
             },
             {
                 name: "cost",
-                label: "Chi phí"
-            }
+                label: "Chi phí",
+            },
         ]}
         {isLoading}
+        bind:bulkSelected={selectedRecords}
         on:select={(e) => giftSelectPanel?.show(e?.detail)}
     />
-    <!-- <BulkBar
-        bulkSelected={selectedHouseholds}
-        actions={[{ label: "Xóa", onClick: deleteSelectedHouseholds, isDanger: true }]}
-    /> -->
+    <BulkBar
+        bulkSelected={selectedRecords}
+        actions={[{ label: "Xóa", onClick: deleteSelected, isDanger: true }]}
+    />
 </PageWrapper>
 
 <GiftUpsertPanel
@@ -137,6 +141,43 @@
 
 <FormPanel
     bind:this={giftSelectPanel}
-    on:submit={(e) => console.log("FormPanel submitted with data", e.detail)}
-    fields={CollectionGift.schema}
+    on:submit={async (e) => {
+        //await Api.updateGift()
+        const {gift_report, num_gift, resident, id} = e.detail;
+        //console.log(id,{gift_report, num_gift, resident});
+        await Api.updateGift(id, {gift_report, num_gift, resident})
+        load();
+    }}
+    fields={[
+        {
+            name: "resident",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "residents",  
+            },
+        },
+        {
+            name: "gift_report",
+            type: "relation",
+            options: {
+                maxSelect: 1,
+                collectionId: "pzgz9wrl4rk10kq",
+            },
+        },
+        {
+            name: "num_gift",
+            type: "number",
+        },
+    ]}
+    excludedFields={{
+        resident: {
+            fieldName: "resident",
+            defaultVal: undefined
+        },
+        gift_report:{
+            fieldName: "gift_report",
+            defaultVal: reportId
+        }
+    }}
 />
