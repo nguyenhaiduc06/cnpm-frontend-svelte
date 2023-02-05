@@ -64,8 +64,10 @@
             if (!CommonHelper.inArray(normalized, item)) {
                 selected = [...normalized, item];
             }
+            console.log(selected);
         } else {
             selected = item;
+            
         }
 
         // emulate native change event

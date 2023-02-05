@@ -68,7 +68,8 @@
                 selected = [...normalized, item];
             }
         } else {
-            selected = items;
+            selected = item;
+            console.log(selected);
         }
 
         // emulate native change event
@@ -268,7 +269,7 @@
                     filter = e.detail
                     items = tmpItems.filter(x => filter.value == "" || x[filter.field].includes(filter.value))
                 }}/>
-                {#each filteredItems as item}
+                {#each items as item}
                     <div
                         tabindex="0"
                         class="dropdown-item option closable"

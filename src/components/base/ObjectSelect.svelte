@@ -14,6 +14,8 @@
     // custom props
     export let selectionKey = "value";
     export let keyOfSelected = multiple ? [] : undefined;
+    //$: console.trace(selected);
+
 
     $: if (items) {
         handleKeyOfSelectedChange(keyOfSelected);
@@ -38,6 +40,7 @@
         }
 
         selected = multiple ? newSelected : newSelected[0];
+        console.log(selected);
     }
 
     async function handleSelectedChange(newSelected) {

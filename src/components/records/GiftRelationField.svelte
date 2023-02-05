@@ -24,6 +24,7 @@
         value = value.slice(field.options.maxSelect - 1);
     }
     $: unique = field.options?.unique ? field.name : "";
+    $: console.log(value);
 </script>
 
 <Field class="form-field {field.required ? 'required' : ''}" name={field.name} let:uniqueId>
@@ -40,7 +41,7 @@
         {filter}
         {unique}
         id={uniqueId}
-        multiple={isMultiple}
+        multiple={false}
         selectPlaceholder={excluded.state ? excluded.defaultVal : "- Select -"}
         collectionId={field.options?.collectionId}
         bind:keyOfSelected={value}
