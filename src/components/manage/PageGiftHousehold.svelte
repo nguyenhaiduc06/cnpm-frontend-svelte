@@ -1,18 +1,12 @@
 <script>
     import { querystring } from "svelte-spa-router";
-    import { replace, push } from "svelte-spa-router";
+    import {  push } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
-    import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import ResidentsList from "./ResidentsList.svelte";
-    import { CollectionGift, CollectionResidentSnapshots } from "../../utils/database/collections";
+    import { CollectionGift } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
-    import RewardList from "./RewardList.svelte";
-    import RecordsList from "../records/RecordsList.svelte";
-    import GiftList from "./HouseholdGiftList.svelte";
     import GiftUpsertPanel from "./GiftUpsertPanel.svelte";
-    import HouseholdGiftList from "./HouseholdGiftList.svelte";
     import { Api } from "@/services/api";
     import CommonHelper from "@/utils/CommonHelper";
     import Table from "../base/Table.svelte";
@@ -72,8 +66,6 @@
         }
 
         //const giftHouseholds = residents.group(({ household }) => household);
-
-        console.log(records);
         isLoading = false;
     }
     async function deleteSelectedHouseholds() {
@@ -84,11 +76,11 @@
             let giftToDelete = giftResidents.filter((x) =>
                 residentsToDelete.find((n) => n.resident == x.resident)
             );
-            console.log(giftToDelete);
             for (let gift of giftToDelete) {
                 deleteTask.push(Api.deleteGift(gift.id));
             }
         }
+        selectedHouseholds = {}
         Promise.all(deleteTask)
             .then(() => {
                 load();
@@ -128,18 +120,6 @@
             </button>
         </div>
     </div>
-
-    <!-- <HouseholdGiftList
-        bind:this={rewardList}
-        collection={CollectionGift}
-        {reportId}
-        bind:filter
-        bind:sort
-        on:select={(e) =>
-            push(
-                `/manage/gift-resident?household=${e.detail.householdId}&giftreport=${reportId}&occasion=${occasion}&year=${year}`
-            )}
-    /> -->
     <Table
         {records}
         fields={[

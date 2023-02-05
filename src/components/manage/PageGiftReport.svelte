@@ -1,13 +1,10 @@
 <script>
-    import { replace, push } from "svelte-spa-router";
-    import Searchbar from "@/components/base/Searchbar.svelte";
+    import { push } from "svelte-spa-router";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
-    import RecordsList from "@/components/records/RecordsList.svelte";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import { CollectionGiftReport } from "../../utils/database/collections";
-    import GiftList from "./HouseholdGiftList.svelte";
     import GiftReportSearchBar from "../base/GiftReportSearchBar.svelte";
     import { Api } from "@/services/api";
     import Table from "../base/Table.svelte";
@@ -24,7 +21,6 @@
     async function load() {
         isLoading = true;
         reportRecords = await Api.getGiftReports();
-        console.log(reportRecords);
         isLoading = false;
     }
     async function deleteSelectedHouseholds() {

@@ -24,7 +24,6 @@
         <i class={CommonHelper.getFieldTypeIcon(field.type)} />
         <span class="txt">{field.name}</span>
     </label>
-    {console.log(value) || ""}
     <RecordSelect
         toggle
         disable={excluded}

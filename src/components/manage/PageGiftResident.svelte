@@ -2,10 +2,8 @@
     import { querystring } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
-    import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import ResidentsList from "./ResidentsList.svelte";
-    import { CollectionGift, CollectionResidentSnapshots } from "../../utils/database/collections";
+    import { CollectionGift } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import GiftUpsertPanel from "./GiftUpsertPanel.svelte";
     import { Api } from "@/services/api";
@@ -53,7 +51,6 @@
         }
 
         isLoading = false;
-        console.log(giftResidents);
         giftResidents = giftResidents;
     }
     async function deleteSelected(){
@@ -142,9 +139,7 @@
 <FormPanel
     bind:this={giftSelectPanel}
     on:submit={async (e) => {
-        //await Api.updateGift()
         const {gift_report, num_gift, resident, id} = e.detail;
-        //console.log(id,{gift_report, num_gift, resident});
         await Api.updateGift(id, {gift_report, num_gift, resident})
         load();
     }}

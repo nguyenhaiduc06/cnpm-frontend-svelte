@@ -24,7 +24,6 @@
         value = value.slice(field.options.maxSelect - 1);
     }
     $: unique = field.options?.unique ? field.name : "";
-    $: console.log(value);
 </script>
 
 <Field class="form-field {field.required ? 'required' : ''}" name={field.name} let:uniqueId>

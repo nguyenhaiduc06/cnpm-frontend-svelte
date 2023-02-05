@@ -1,15 +1,12 @@
 <script>
     import { querystring } from "svelte-spa-router";
-    import { replace } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import ResidentsList from "./ResidentsList.svelte";
     import { CollectionReward, CollectionResidentSnapshots } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import RewardList from "./RewardList.svelte";
-    import RecordsList from "../records/RecordsList.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardreport") || "";
