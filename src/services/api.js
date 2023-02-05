@@ -16,6 +16,9 @@ export class Api {
         return ApiClient.collection("residents").create(data);
     }
 
+    static async getResidentSnapshot(residentSnapshotId) {
+        return ApiClient.collection("resident_snapshots").getOne(residentSnapshotId);
+    }
     static async createResidentSnapshot(data) {
         return ApiClient.collection("resident_snapshots").create(data);
     }
@@ -31,10 +34,28 @@ export class Api {
     }
 
     static async createHousehold(householdData) {
-        const record = await ApiClient.collection("households").create(householdData);
+        return ApiClient.collection("households").create(householdData);
     }
 
     static async deleteHousehold(household) {
         await ApiClient.collection("households").delete(household.id);
+    }
+
+    static async updateResidentSnapshot(id, data) {
+        return ApiClient.collection("resident_snapshots").update(id, data)
+    }
+
+    static async createResidentChange(data) {
+        return ApiClient.collection("resident_changes").create(data);
+    }
+
+    static async getResidentChange() {
+        const filter = `change_type != "dead"`;
+        const result = await ApiClient.collection("resident_changes").getFullList(200, {
+            filter,
+            expand: "resident,old_household,new_household",
+        });
+
+        return result;
     }
 }
