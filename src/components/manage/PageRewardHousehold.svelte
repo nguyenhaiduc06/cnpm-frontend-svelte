@@ -149,7 +149,7 @@
         bind:bulkSelected={selectedHouseholds}
         on:select={(e) =>
             push(
-                `/manage/reward-resident?household=${e.detail.householdId}&giftreport=${reportId}&occasion=${occasion}&year=${year}`
+                `/manage/reward-resident?household=${e.detail.householdId}&rewardreport=${reportId}&year=${year}`
             )}
     />
     <BulkBar
