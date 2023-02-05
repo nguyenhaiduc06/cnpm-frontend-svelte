@@ -37,4 +37,11 @@ export class Api {
     static async deleteHousehold(household) {
         await ApiClient.collection("households").delete(household.id);
     }
+    static async getGiftReports(){
+        const records = await ApiClient.collection("gift_report").getFullList(200, {});
+        return records;
+    }
+    static async deleteGiftReport(report){
+        await ApiClient.collection("gift_report").delete(report.id);
+    }
 }
