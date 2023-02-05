@@ -33,11 +33,20 @@ export default class CommonHelper {
      * @return {Boolean}
      */
     static costPerGift = 4;
+    static costPerReward = 5;
     static isObject(value) {
         return value !== null && typeof value === "object" && value.constructor === Object;
     }
     static translateToVN(word){
         return dictionary[word] || word;
+    }
+    static getCorrespondingRewards(educationResult){
+        const mapper = {
+            Excellent: 10,
+            Good: 7,
+            Average: 5         
+        }
+        return mapper[educationResult] || 0;
     }
 
     /**

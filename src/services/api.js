@@ -73,4 +73,30 @@ export class Api {
     static async updateGift(giftId, data){
         await ApiClient.collection("gift").update(giftId, data);
     }
+    
+    
+    static async getRewardReports() {
+        const records = await ApiClient.collection("reward_report").getFullList(200, {});
+        return records;
+    }
+    static async deleteRewardReport(report) {
+        await ApiClient.collection("reward_report").delete(report.id);
+    }
+    static async getRewards(reportId) {
+        const records = await ApiClient.collection("reward").getFullList(200, {
+            filter: `reward_report="${reportId}"`,
+        });
+        return records;
+    }
+    static async deleteReward(rewardId) {
+        const result = await ApiClient.collection("reward").delete(rewardId);
+        return result;
+    }
+    static async updateReward(rewardId, data){
+        await ApiClient.collection("reward").update(rewardId, data);
+    }
+    static async addReward(data){
+        let result = await ApiClient.collection("reward").create(data);
+        return result;
+    }
 }

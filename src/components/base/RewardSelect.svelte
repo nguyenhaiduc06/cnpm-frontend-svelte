@@ -43,7 +43,6 @@
 
         return CommonHelper.inArray(normalized, item);
     };
-    $: console.log(items);
 
     // Selection handlers
     // ---------------------------------------------------------------
