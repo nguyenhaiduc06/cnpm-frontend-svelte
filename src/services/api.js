@@ -11,11 +11,21 @@ export class Api {
 
         return result;
     }
-    static async getAllResidents(){
+    static async getAllResidents() {
         const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
             expand: "resident, household",
         });
         return records;
+    }
+    static async getAllResidentsInfo() {
+        const records = await ApiClient.collection("residents").getFullList(200, {});
+        return records;
+    }
+    static async getResidentInfo(residentId, autoCancel = true){
+        const result = await ApiClient.collection("residents").getOne(residentId, {
+            $autoCancel: autoCancel
+        });
+        return result;
     }
 
     static async createResident(data) {
@@ -43,20 +53,20 @@ export class Api {
     static async deleteHousehold(household) {
         await ApiClient.collection("households").delete(household.id);
     }
-    static async getGiftReports(){
+    static async getGiftReports() {
         const records = await ApiClient.collection("gift_report").getFullList(200, {});
         return records;
     }
-    static async deleteGiftReport(report){
+    static async deleteGiftReport(report) {
         await ApiClient.collection("gift_report").delete(report.id);
     }
-    static async getGifts(reportId){
+    static async getGifts(reportId) {
         const records = await ApiClient.collection("gift").getFullList(200, {
-            filter: `gift_report="${reportId}"`
-        })
+            filter: `gift_report="${reportId}"`,
+        });
         return records;
     }
-    static async deleteGift(giftId){
+    static async deleteGift(giftId) {
         const result = await ApiClient.collection("gift").delete(giftId);
         return result;
     }
