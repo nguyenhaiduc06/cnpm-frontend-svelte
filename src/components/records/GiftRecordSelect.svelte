@@ -9,7 +9,7 @@
 
     const uniqueId = "select_" + CommonHelper.randomString(5);
 
-    // original select props 
+    // original select props
     export let multiple = false;
     export let selected = [];
     export let keyOfSelected = multiple ? [] : undefined;
@@ -131,11 +131,18 @@
         try {
             const page = reset ? 1 : currentPage + 1;
 
-            const result = await ApiClient.collection(collectionId).getList(page, 200, {
+            const snapshots = await ApiClient.collection(collectionId).getList(page, 200, {
                 sort: "-created",
-                filter: filter,
+                filter:
+                    collectionId == "resident_snapshots"
+                        ? filter
+                            ? `${filter} && active = true`
+                            : "active = true"
+                        : filter,
                 $cancelKey: uniqueId + "loadList",
+                expand: "resident, household, gift",
             });
+            console.log(snapshots);
 
             if (reset) {
                 list = CommonHelper.toArray(selected).slice();
@@ -147,25 +154,17 @@
                 });
 
                 const existedItems = giftList.items.map((x) => x[unique]);
-                result.items = result.items.filter((x) => !existedItems.includes(x.resident));
-                result.items.map((x) => (x.id = x.resident));
-                
-                for(let x of result.items){
-                    const resident = await ApiClient.collection("residents").getOne(x.id, {
-                        $autoCancel: false
-                    });
-                    const snapshot = await ApiClient.collection("resident_snapshots").getFullList(1, {
-                        filter:`resident="${x.id}" && active = true`, $autoCancel: false
-                    })
-                    x.name = resident.name;
-                    x.household = snapshot[0].household;
-                }   
-            }  
+                snapshots.items = snapshots.items.filter((x) => !existedItems.includes(x.resident));
+                snapshots.items.map((x) => (x.id = x.resident));
+                snapshots.items.map((x) => {
+                    (x.name = x.expand.resident.name), (x.household = x.expand.household.address);
+                });
+            }
             list = CommonHelper.filterDuplicatesByKey(
-                list.concat(result.items, CommonHelper.toArray(selected))
+                list.concat(snapshots.items, CommonHelper.toArray(selected))
             );
-            currentPage = result.page;
-            totalItems = result.totalItems;
+            currentPage = snapshots.page;
+            totalItems = snapshots.totalItems;
         } catch (err) {
             ApiClient.errorResponseHandler(err);
         }
@@ -181,7 +180,7 @@
     searchable={list.length > 5}
     selectionKey="id"
     labelComponent={optionComponent}
-    selectComponent = {GiftSelect}
+    selectComponent={GiftSelect}
     labelComponentProps={{
         metaField: labelMetaField,
     }}

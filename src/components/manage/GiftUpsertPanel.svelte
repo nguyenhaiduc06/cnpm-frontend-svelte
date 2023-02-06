@@ -395,7 +395,7 @@
                         {field}
                         bind:value={record[field.name]}
                         excluded={field.excluded}
-                        filter={field.options?.collectionId == householdCollectionId ? filter : ""}
+                        filter={field.options?.collectionId == "resident_snapshots" ? filter : ""}
                         labelMetaField={field.options?.metaField}
                         optionMetaField={field.options?.metaField}
                     />

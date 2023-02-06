@@ -24,12 +24,13 @@
     let filter;
     let selectedRecords = [];
 
-    $: rewardedResidents = [];
+    $: records = [];
     $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
 
     $: filter = reportId ? `household ="${household}"` : "";
+    $: console.trace(records)
     load();
     async function load() {
         reactiveParams = new URLSearchParams($querystring);
@@ -37,7 +38,7 @@
         household = reactiveParams.get("household") || "";
         isLoading = true;
 
-        rewardedResidents = await Api.getRewards(reportId);
+        let rewardedResidents = await Api.getRewards(reportId);
         residents_snaps = (await Api.getAllResidents()).filter(
             (x) => rewardedResidents.find((n) => n.resident == x.resident) && x.household == household
         );
@@ -46,15 +47,15 @@
             residents_snaps.find((n) => n.resident == x.resident)
         );
         for (let resident of rewardedResidents) {
-            let residentName = (await Api.getResidentInfo(resident.resident, false)).name;
+            let residentName = resident.expand.resident.name;
             resident.residentName = residentName;
             resident.num_reward = CommonHelper.getCorrespondingRewards(resident.education_result);
             resident.cost = resident.num_reward * CommonHelper.costPerReward;
         }
 
-        isLoading = false;
-        rewardedResidents = rewardedResidents;
+        records = rewardedResidents;
         baseRecords = [...rewardedResidents];
+        isLoading = false;
     }
     async function deleteSelected() {
         const rewards = Object.values(selectedRecords);
@@ -106,14 +107,14 @@
         placeholder="Tìm nhân khẩu (nhập tên)"
         on:submit={(e) => {
             const searchKey = e.detail.residentName;
-            rewardedResidents = baseRecords.filter(x => x.residentName.includes(searchKey))
+            records = baseRecords.filter(x => x.residentName.includes(searchKey))
         }}
         on:clear={(e) => {
-            rewardedResidents = [...baseRecords]
+            records = [...baseRecords]
         }}
     />
     <Table
-        records={rewardedResidents}
+        records={records}
         fields={[
             {
                 name: "residentName",

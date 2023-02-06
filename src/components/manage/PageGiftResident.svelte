@@ -24,7 +24,7 @@
     let filter;
     let selectedRecords = [];
 
-    $: giftResidents = [];
+    $: records = [];
     $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
@@ -39,21 +39,21 @@
         household = reactiveParams.get("household") || "";
         isLoading = true;
 
-        giftResidents = await Api.getGifts(reportId);
+        let giftResidents = await Api.getGifts(reportId);
         residents_snaps = (await Api.getAllResidents()).filter(
             (x) => giftResidents.find((n) => n.resident == x.resident) && x.household == household
         );
 
         giftResidents = giftResidents.filter((x) => residents_snaps.find((n) => n.resident == x.resident));
         for (let gift of giftResidents) {
-            let residentName = (await Api.getResidentInfo(gift.resident, false)).name;
+            let residentName = gift.expand.resident.name;
             gift.residentName = residentName;
             gift.cost = gift.num_gift * CommonHelper.costPerGift;
             gift.occasion = occasion;
         }
 
         isLoading = false;
-        giftResidents = giftResidents;
+        records = giftResidents;
         baseRecords = [...giftResidents];
     }
     async function deleteSelected(){
@@ -107,15 +107,15 @@
         placeholder="Tìm nhân khẩu (nhập tên)"
         on:submit={(e) => {
             const searchKey = e.detail.residentName;
-            giftResidents = baseRecords.filter(x => x.residentName.includes(searchKey))
+            records = baseRecords.filter(x => x.residentName.includes(searchKey))
         }}
         on:clear={(e) => {
-            giftResidents = [...baseRecords]
+            records = [...baseRecords]
         }}
     />
     
     <Table
-        records={giftResidents}
+        records={records}
         fields={[
             {
                 name: "residentName",

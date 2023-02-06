@@ -69,6 +69,7 @@ export class Api {
     static async getGifts(reportId) {
         const records = await ApiClient.collection("gift").getFullList(200, {
             filter: `gift_report="${reportId}"`,
+            expand:"resident"
         });
         return records;
     }
@@ -91,6 +92,7 @@ export class Api {
     static async getRewards(reportId) {
         const records = await ApiClient.collection("reward").getFullList(200, {
             filter: `reward_report="${reportId}"`,
+            expand:"resident"
         });
         return records;
     }
