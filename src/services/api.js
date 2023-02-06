@@ -137,4 +137,22 @@ export class Api {
     static async createAbsentResident(data) {
         await ApiClient.collection("absent_residents").create(data);
     }
+
+    static async getTemporaryResidents() {
+        const result = await ApiClient.collection("temporary_residents").getFullList(200, {
+            sort: "-created",
+            expand: "resident",
+        });
+        return result.map(r => ({
+            id: r.id,
+            name: r.expand.resident?.name,
+            from: r.from,
+            to: r.to,
+            address: r.address,
+        }));
+    }
+
+    static async createTemporaryResident(data) {
+        await ApiClient.collection("temporary_residents").create(data);
+    }
 }

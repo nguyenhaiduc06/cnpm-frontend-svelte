@@ -1,14 +1,29 @@
 <script>
     import { CollectionTemporaryResidents } from "@/utils/database/collections";
     import PageWrapper from "../base/PageWrapper.svelte";
-    import RecordsList from "../records/RecordsList.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import RefreshButton from "../base/RefreshButton.svelte";
-    import RecordUpsertPanel from "../records/RecordUpsertPanel.svelte";
+    import Table from "../base/Table.svelte";
+    import { Api } from "@/services/api";
+    import FormPanel from "../base/FormPanel.svelte";
+    import { addSuccessToast } from "@/stores/toasts";
 
-    const collection = CollectionTemporaryResidents;
-    let recordsList;
-    let recordUpsertPanel;
+    let addTemporaryResidentFormPanel;
+    let isLoading;
+    let records;
+
+    load();
+
+    async function load() {
+        isLoading = true;
+        records = await Api.getTemporaryResidents();
+        isLoading = false;
+    }
+
+    async function addTemporaryResident(data) {
+        await Api.createTemporaryResident(data);
+        addSuccessToast("Đã đăng ký tạm trú");
+        load();
+    }
 </script>
 
 <ManageSidebar />
@@ -18,26 +33,41 @@
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">Tạm trú</div>
         </nav>
-
-        <div class="inline-flex">
-            <RefreshButton on:refresh={() => recordsList?.load()} />
-        </div>
     </header>
     <div class="flex m-b-sm">
-        <div class="flex-fill" />
-        <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => recordUpsertPanel?.show()}>
-                <i class="ri-add-line" />
-                <span class="txt">Đăng kí tạm trú</span>
-            </button>
-        </div>
+        <button type="button" class="btn btn-expanded" on:click={() => addTemporaryResidentFormPanel?.show()}>
+            <i class="ri-add-line" />
+            <span class="txt">Đăng kí tạm trú</span>
+        </button>
     </div>
-    <RecordsList bind:this={recordsList} {collection} on:select={(e) => recordUpsertPanel?.show(e.detail)} />
+
+    <Table
+        {isLoading}
+        {records}
+        fields={[
+            {
+                name: "name",
+                label: "Tên",
+            },
+            {
+                name: "form",
+                label: "Từ ngày",
+            },
+            {
+                name: "to",
+                label: "Tới ngày",
+            },
+            {
+                name: "address",
+                label: "Địa chỉ tạm trú",
+            },
+        ]}
+    />
 </PageWrapper>
 
-<RecordUpsertPanel
-    bind:this={recordUpsertPanel}
-    {collection}
-    on:save={() => recordsList?.reloadLoadedPages()}
-    on:delete={() => recordsList?.reloadLoadedPages()}
+<FormPanel
+    bind:this={addTemporaryResidentFormPanel}
+    title="Đăng ký tạm trú"
+    fields={CollectionTemporaryResidents.schema}
+    on:submit={(e) => addTemporaryResident(e.detail)}
 />
