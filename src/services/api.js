@@ -124,6 +124,7 @@ export class Api {
 
     static async getAbsentResidents() {
         const result = await ApiClient.collection("absent_residents").getFullList(200, {
+            sort: "-created",
             expand: "resident",
         });
         return result.map((r) => ({
