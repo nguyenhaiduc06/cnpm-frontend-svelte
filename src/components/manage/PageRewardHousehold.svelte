@@ -13,6 +13,7 @@
     import BulkBar from "../base/BulkBar.svelte";
     import RewardFormPanel from "./RewardFormPanel.svelte";
     import CustomFormPanel from "./CustomFormPanel.svelte";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardReport") || "";
@@ -27,6 +28,7 @@
     let rewardList;
 
     $: records = [];
+    $: baseRecords = [];
     let selectedHouseholds = [];
     let isLoading;
 
@@ -71,6 +73,7 @@
 
         //const giftHouseholds = residents.group(({ household }) => household);
         isLoading = false;
+        baseRecords = [...records];
         reportId = reactiveParams.get("rewardreport") || "";
     }
     async function deleteSelectedHouseholds() {
@@ -124,7 +127,18 @@
                 <span class="txt">Thêm trao quà</span>
             </button>
         </div>
-    </div>
+    </div> 
+    <CustomSearchBar
+        searchField="household"
+        placeholder="Tìm hộ khẩu (nhập địa chỉ)"
+        on:submit={(e) => {
+            const searchVal = e.detail.household || "";
+            records = baseRecords.filter((x) => x.household.includes(searchVal));
+        }}
+        on:clear={(e) => {
+            records = [...baseRecords]
+        }}
+    />
     <Table
         {records}
         fields={[
@@ -181,7 +195,7 @@
             },
         },
     ]}
-    existedHousehold={records.map(x => x.householdId)}
+    existedHousehold={records.map((x) => x.householdId)}
     on:submit={async (e) => {
         let household = e.detail.household;
         records.push({
@@ -193,5 +207,4 @@
         });
         records = records;
     }}
-    
 />

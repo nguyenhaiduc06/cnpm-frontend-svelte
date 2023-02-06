@@ -11,6 +11,7 @@
     import RewardFormPanel from "./RewardFormPanel.svelte";
     import BulkBar from "../base/BulkBar.svelte";
     import { detach } from "svelte/internal";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardreport") || "";
@@ -24,6 +25,7 @@
     let selectedRecords = [];
 
     $: rewardedResidents = [];
+    $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
 
@@ -52,6 +54,7 @@
 
         isLoading = false;
         rewardedResidents = rewardedResidents;
+        baseRecords = [...rewardedResidents];
     }
     async function deleteSelected() {
         const rewards = Object.values(selectedRecords);
@@ -98,6 +101,17 @@
             </button>
         </div>
     </div>
+    <CustomSearchBar 
+        searchField="residentName"
+        placeholder="Tìm nhân khẩu (nhập tên)"
+        on:submit={(e) => {
+            const searchKey = e.detail.residentName;
+            rewardedResidents = baseRecords.filter(x => x.residentName.includes(searchKey))
+        }}
+        on:clear={(e) => {
+            rewardedResidents = [...baseRecords]
+        }}
+    />
     <Table
         records={rewardedResidents}
         fields={[
