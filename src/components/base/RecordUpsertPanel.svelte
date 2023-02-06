@@ -118,11 +118,11 @@
 
         let request;
         if (record.isNew) {
-            request = ApiClient.collection(collection.id).create(data);
-            //dispatch("create", data);
+            dispatch("create", data);
+            // request = ApiClient.collection(collection.id).create(data);
         } else {
-            request = ApiClient.collection(collection.id).update(record.id, data);
-            //dispatch("update", data);
+            dispatch("update", {record, data});
+            // request = ApiClient.collection(collection.id).update(record.id, data);
         }
 
         //return;

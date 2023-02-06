@@ -7,21 +7,42 @@
     import { onMount } from "svelte";
     import { Chart, registerables } from "chart.js";
     import "chartjs-adapter-luxon";
+    import { Api } from "@/services/api";
     let genderChartCanvas;
     let ageChartCanvas;
     let chartInst;
+    let ageDataSet = [0, 0, 0, 0];
+    let genderDataSet = [0, 0];
 
-    onMount(() => {
-        const data = [
-            { year: 2010, count: 10 },
-            { year: 2011, count: 20 },
-            { year: 2012, count: 15 },
-            { year: 2013, count: 25 },
-            { year: 2014, count: 22 },
-            { year: 2015, count: 30 },
-            { year: 2016, count: 28 },
-        ];
+    onMount(async () => {
 
+        const residents = await Api.getResidents();
+
+        for (const record of residents) {
+            const { resident } = record.expand;
+            const { birthday, gender } = resident ?? {};
+
+            const age = new Date(Date.now()).getFullYear() - new Date(birthday).getFullYear();
+            if (0 <= age && age <= 5) {
+                ageDataSet[0]++;  
+            }
+            if (6 <= age && age <= 18) {
+                ageDataSet[1]++;  
+            }
+            if (19 <= age && age <= 45) {
+                ageDataSet[2]++;  
+            }
+            if (46 <= age) {
+                ageDataSet[3]++;  
+            }
+
+            if (gender == "nam") {
+                genderDataSet[0]++;
+            } else if (gender == "nữ") {
+                genderDataSet[1]++;
+            }
+        }
+        
         Chart.register(...registerables);
 
         new Chart(genderChartCanvas, {
@@ -31,7 +52,7 @@
                 datasets: [
                     {
                         label: "Giới tính",
-                        data: [100, 200],
+                        data: genderDataSet,
                         backgroundColor: ["#f87171", "#60a5fa"],
                         hoverOffset: 4,
                     },
@@ -42,11 +63,12 @@
         new Chart(ageChartCanvas, {
             type: "doughnut",
             data: {
-                labels: ["Mầm non", "Cấp 1", "Lao động", "Nghỉ hưu"],
+                // labels: ["Mầm non", "Cấp 1", "Lao động", "Nghỉ hưu"],
+                labels: ["1-5 tuổi", "6-18 tuổi", "19-45 tuổi", "trên 45 tuổi"],
                 datasets: [
                     {
                         label: "Giới tính",
-                        data: [100, 200, 300, 200],
+                        data: ageDataSet,
                         backgroundColor: ["#f87171", "#4ade80", "#60a5fa", "#c084fc"],
                     },
                 ],

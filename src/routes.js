@@ -8,6 +8,8 @@ import PageManage            from "@/components/manage/PageManage.svelte";
 import PageHouseholds        from "@/components/manage/PageHouseholds.svelte";
 import PageResidents         from "@/components/manage/PageResidents.svelte";
 import PageResidentsReport   from "./components/manage/PageResidentsReport.svelte";
+import PageResidentHistoryChange 
+                             from "./components/manage/PageResidentsHistoryChange.svelte";
 import PageAbsent            from "@/components/manage/PageAbsent.svelte";
 import PageTemporary         from "@/components/manage/PageTemporary.svelte";
 import PageAdmins            from "@/components/admins/PageAdmins.svelte";
@@ -83,6 +85,12 @@ const routes = {
 
     "/manage/residents/report": wrap({
         component: PageResidentsReport,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/manage/residents/historyChange": wrap({
+        component: PageResidentHistoryChange,        
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),

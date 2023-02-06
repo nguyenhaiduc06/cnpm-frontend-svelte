@@ -3,8 +3,14 @@
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import { CollectionResidents, CollectionResidentSnapshots } from "../../utils/database/collections";
+    import {
+        CollectionHouseholds,
+        CollectionResidents,
+        CollectionResidentSnapshots,
+    } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
+    import ApiClient from "@/utils/ApiClient";
+
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import { fly } from "svelte/transition";
@@ -20,6 +26,7 @@
     let selectHouseholdFormPanel;
     let filterFormPanel;
 
+    $: filter = householdId ? `household ="${householdId}"` : "";
     let isLoading = true;
     let residents;
     let selectedResidents = {};
@@ -75,13 +82,119 @@
         }
     }
 
-    function updateResident(data) {}
+    function updateResident({ record, data }) {
+        const residentSnapshotCollectionId = "s4r3ipyouaoe4eo";
+        ApiClient.collection(residentSnapshotCollectionId).update(record.id, data);
+    }
 
-    function changeHousehold(data) {}
+    async function changeHousehold(data) {
+        const bulkSelected = selectedResidents;
+        try {
+            const { household } = data;
+            await Promise.all(
+                Object.keys(bulkSelected).map(async (recordId) => {
+                    const record = await Api.getResidentSnapshot(recordId);
+                    await Api.updateResidentSnapshot(recordId, {
+                        ...record,
+                        active: false,
+                    });
+                    const residentSnapshot = await Api.createResidentSnapshot({
+                        resident: record.resident,
+                        household,
+                        relation_with_householder: record.relation_with_householder,
+                        alive: true,
+                        note: record.note,
+                        active: true,
+                    });
 
-    function splitIntoNewHousehold(data) {}
+                    const residentChange = await Api.createResidentChange({
+                        resident: record.resident,
+                        old_household: record.household,
+                        new_household: household,
+                        old_snapshot: recordId,
+                        new_snapshot: residentSnapshot.id,
+                        change_type: "change-household",
+                    });
+                })
+            );
+            addSuccessToast(`Đã chuyển khẩu thành công`);
+        } catch (error) {
+            addErrorToast(e.message);
+        }
+    }
 
-    function maskAsDead(data) {}
+    async function splitIntoNewHousehold(data) {
+        const bulkSelected = selectedResidents;
+        try {
+            const newHousehold = await Api.createHousehold(data);
+            await Promise.all(
+                Object.keys(bulkSelected).map(async (recordId) => {
+                    const record = await Api.getResidentSnapshot(recordId);
+                    await Api.updateResidentSnapshot(recordId, {
+                        ...record,
+                        active: false,
+                    });
+                    const residentSnapshot = await Api.createResidentSnapshot({
+                        resident: record.resident,
+                        household: newHousehold.id,
+                        relation_with_householder: record.relation_with_householder,
+                        alive: true,
+                        note: record.note,
+                        active: true,
+                    });
+
+                    const residentChange = await Api.createResidentChange({
+                        resident: record.resident,
+                        old_household: record.household,
+                        new_household: newHousehold.id,
+                        old_snapshot: recordId,
+                        new_snapshot: residentSnapshot.id,
+                        change_type: "split-household",
+                    });
+                })
+            );
+            addSuccessToast(`Đã tách khẩu thành công`);
+        } catch (error) {
+            addErrorToast(e.message);
+        }
+    }
+
+    async function maskAsDead(data) {
+        //TODO: alert
+        const bulkSelected = selectedResidents;
+        try {
+            const { household } = data;
+            await Promise.all(
+                Object.keys(bulkSelected).map(async (recordId) => {
+                    const record = await Api.getResidentSnapshot(recordId);
+                    await Api.updateResidentSnapshot(recordId, {
+                        ...record,
+                        active: false,
+                    });
+                    const residentSnapshot = await Api.createResidentSnapshot({
+                        resident: record.resident,
+                        household: record.household,
+                        relation_with_householder: record.relation_with_householder,
+                        alive: true,
+                        note: "dead",
+                        active: true,
+                    });
+
+                    const residentChange = await Api.createResidentChange({
+                        resident: record.resident,
+                        old_household: record.household,
+                        new_household: record.household,
+                        old_snapshot: recordId,
+                        new_snapshot: residentSnapshot.id,
+                        change_type: "dead",
+                    });
+                })
+            );
+            addSuccessToast(`Đã khai tử`);
+        } catch (error) {
+            addErrorToast(e.message);
+        }
+    }
 </script>
 
 <ManageSidebar />
@@ -102,10 +215,10 @@
             <i class="ri-add-line" />
             <span class="txt">Đăng kí thường trú</span>
         </button>
-        <button type="button" class="btn btn-outline" on:click={() => addResidentFormPanel?.show()}>
+        <a class="btn btn-outline" href="/manage/residents/historyChange" use:link>
             <i class="ri-history-line" />
             <span class="txt">Lịch sử thay đổi</span>
-        </button>
+        </a>
         <a class="btn btn-outline" href="/manage/residents/report" use:link>
             <i class="ri-pie-chart-line" />
             <span class="txt">Thống kê</span>
@@ -182,7 +295,23 @@
     {/if}
 </PageWrapper>
 
-<!-- update fields props to display necessary fields in form -->
+<!-- <RecordUpsertPanel
+    bind:this={residentUpsertPanel}
+    collection={CollectionResidentSnapshots}
+    on:save={() => residentsList?.reloadLoadedPages()}
+    on:delete={() => residentsList?.reloadLoadedPages()}
+    on:create={(e) => createResident(e.detail)}
+    on:update={(e) => updateResident(e.detail)}
+/>
+
+<RecordUpsertPanel
+    bind:this={householdUpsertPanel}
+    collection={CollectionHouseholds}
+    on:save={() => residentsList?.reloadLoadedPages()}
+    on:delete={() => residentsList?.reloadLoadedPages()}
+    on:create={(e) => splitHousehold(e.detail)}
+    on:update={(e) => console.log("🚀 update record with data", e.detail)}
+/> -->
 <FormPanel
     bind:this={addResidentFormPanel}
     title="Đăng kí thường trú"
@@ -207,14 +336,14 @@
 <FormPanel
     bind:this={addHouseholdFormPanel}
     title="Tạo hộ khẩu mới"
-    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    fields={CollectionHouseholds.schema}
     on:submit={(e) => splitIntoNewHousehold(e.detail)}
 />
 
 <FormPanel
     bind:this={selectHouseholdFormPanel}
     title="Chọn hộ khẩu chuyển đến"
-    fields={CollectionResidentSnapshots.schema.filter((s) => ["resident"].includes(s.name))}
+    fields={CollectionResidentSnapshots.schema.filter((s) => ["household"].includes(s.name))}
     on:submit={(e) => changeHousehold(e.detail)}
 />
 
