@@ -169,7 +169,6 @@
                         };
                     }
                     totalRecords = renderItems.length;
-                    console.log(renderItems);
 
                     //renderItems = renderItems.map(n => )
                     dispatch("load", records.concat(renderItems));

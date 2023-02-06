@@ -13,6 +13,9 @@
     import JsonField from "@/components/records/fields/JsonField.svelte";
     import FileField from "@/components/records/fields/FileField.svelte";
     import RelationField from "@/components/records/fields/RelationField.svelte";
+    import RewardRecordSelect from "../records/RewardRecordSelect.svelte";
+    import { CollectionResidents } from "@/utils/database/collections";
+    import RecordSelect from "../records/RecordSelect.svelte";
 
     const dispatch = createEventDispatcher();
     const formId = "record_" + CommonHelper.randomString(5);
@@ -22,19 +25,32 @@
     export let cancelLabel = "Cancel";
     export let submitLabel = "Submit";
     export let excludedFields = {};
+    export let relationFieldComponent = RelationField;
+    export let household;
 
     let panel;
     let record = new Record();
     let uploadedFilesMap = {};
     let deletedFileIndexesMap = {};
+    let residentsCollectionId = CollectionResidents.id;
 
+    $: console.log(excludedFields);
+    $: console.log(uploadedFilesMap)
     function submit() {
-        dispatch("submit", record);
+        let data = exportFormData();
+        for(let i of Object.keys(uploadedFilesMap)){
+            record[i] = uploadedFilesMap[i][0];
+        }
+        for(let pair of data.entries()){
+            console.log(pair[0], pair[1])
+        }
+        dispatch("submit", data);
         hide();
     }
+    $: filter = household == "" ? "" : `household="${household}"`;
 
     export function show(model) {
-        console.log("🚀 ~ model", model)
+        console.log("🚀 ~ model", model);
         load(model);
         panel?.show();
     }
@@ -51,6 +67,48 @@
         }
         uploadedFilesMap = {};
         deletedFileIndexesMap = {};
+    }
+    function exportFormData() {
+        const data = record?.export() || {};
+        const formData = new FormData();
+
+        const exportableFields = {};
+        for (const field of fields || []) {
+            exportableFields[field.name] = true;
+        }
+
+        console.log(data);
+        // export base fields
+        for (const key in data) {
+            // skip non-schema fields
+            if (!exportableFields[key]) {
+                continue;
+            }
+            // normalize nullable values
+            if (typeof data[key] === "undefined") {
+                data[key] = null;
+            }
+
+            CommonHelper.addValueToFormData(formData, key, data[key]);
+        }
+
+        // add uploaded files  (if any)
+        for (const key in uploadedFilesMap) {
+            const files = CommonHelper.toArray(uploadedFilesMap[key]);
+            for (const file of files) {
+                formData.append(key, file);
+            }
+        }
+
+        // unset deleted files (if any)
+        for (const key in deletedFileIndexesMap) {
+            const indexes = CommonHelper.toArray(deletedFileIndexesMap[key]);
+            for (const index of indexes) {
+                formData.append(key + "." + index, "");
+            }
+        }
+
+        return formData;
     }
 </script>
 
@@ -88,8 +146,15 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    {console.log(field.name, record[field.name]) || ""}
-                    <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]}/>
+                    {console.log(field.options) || ""}
+                    <svelte:component
+                        this={relationFieldComponent}
+                        {field}
+                        bind:value={record[field.name]}
+                        filter={field.options?.collectionId == "resident_snapshots" ? filter : ""}
+                        excluded={excludedFields[field.name]}
+                        recordSelectComponent={field.options?.collectionId == "resident_snapshots" ? RewardRecordSelect : RecordSelect}
+                    />
                 {/if}
             {/each}
         </form>

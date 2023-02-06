@@ -117,7 +117,8 @@
 
                     {#each fields as field (field.name)}
                         <!-- <RecordFieldCell {record} {field} /> -->
-                        <td>{record[field.name]}</td>
+                        <!-- <td>{record[field.name]}</td> -->
+                        <RecordFieldCell {record} {field}/> 
                     {/each}
 
                     <td class="col-type-action min-width">

@@ -22,11 +22,14 @@
     export let cancelLabel = "Cancel";
     export let submitLabel = "Submit";
     export let excludedFields = {};
+    export let existedHousehold = [];
 
     let panel;
     let record = new Record();
     let uploadedFilesMap = {};
     let deletedFileIndexesMap = {};
+    
+    $: console.log(existedHousehold)
 
     function submit() {
         dispatch("submit", record);
@@ -88,8 +91,8 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    {console.log(field.name, record[field.name]) || ""}
-                    <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]}/>
+                    {console.log(existedHousehold) || ""}
+                    <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]} existedValues={existedHousehold}/>
                 {/if}
             {/each}
         </form>

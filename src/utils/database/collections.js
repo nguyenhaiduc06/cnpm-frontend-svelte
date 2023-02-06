@@ -411,7 +411,7 @@ export const CollectionReward = {
             type: "relation",
             options: {
                 maxSelect: 1,
-                collectionId: "gabzhpa0gwujotf",
+                collectionId: "resident_snapshots",
                 cascadeDelete: false,
             },
         },

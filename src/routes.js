@@ -9,6 +9,8 @@ import PageHouseholds        from "@/components/manage/PageHouseholds.svelte";
 import PageResidents         from "@/components/manage/PageResidents.svelte";
 import PagePermanent         from "@/components/manage/PagePermanent.svelte";
 import PageResidentsReport   from "./components/manage/PageResidentsReport.svelte";
+import PageResidentHistoryChange 
+                             from "./components/manage/PageResidentsHistoryChange.svelte";
 import PageAbsent            from "@/components/manage/PageAbsent.svelte";
 import PageTemporary         from "@/components/manage/PageTemporary.svelte";
 import PageAdmins            from "@/components/admins/PageAdmins.svelte";
@@ -26,6 +28,8 @@ import PageGift              from "./components/manage/PageGift.svelte";
 import PageGiftReport        from "./components/manage/PageGiftReport.svelte";
 import PageGiftHousehold     from "./components/manage/PageGiftHousehold.svelte";
 import PageGiftResident      from "./components/manage/PageGiftResident.svelte";
+import PageRewardHousehold from "./components/manage/PageRewardHousehold.svelte";
+import PageRewardResidents from "./components/manage/PageRewardResidents.svelte";
 
 const baseConditions = [
     async (details) => {
@@ -94,6 +98,12 @@ const routes = {
         userData: { showAppSidebar: true },
     }),
 
+    "/manage/residents/historyChange": wrap({
+        component: PageResidentHistoryChange,        
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
     "/manage/absent": wrap({
         component: PageAbsent,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
@@ -106,7 +116,12 @@ const routes = {
         userData: { showAppSidebar: true },
     }),
     "/manage/reward": wrap({
-        component: PageReward,
+        component: PageRewardHousehold,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+    "/manage/reward-resident": wrap({
+        component: PageRewardResidents,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
