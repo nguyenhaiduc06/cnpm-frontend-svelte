@@ -383,7 +383,7 @@ export const CollectionTemporaryResidents = {
     options: {},
 };
 export const CollectionRewardReport = {
-    id: "5sela3i08hhb9u8",
+    id: "reward_report",
     name: "Reward Reports",
     type: "base",
     system: false,
@@ -401,7 +401,7 @@ export const CollectionRewardReport = {
     options: {},
 };
 export const CollectionReward = {
-    id: "b2eiamk7yp7jby7",
+    id: "reward",
     name: "Rewards",
     type: "base",
     system: false,
@@ -420,7 +420,7 @@ export const CollectionReward = {
             type: "relation",
             options: {
                 maxSelect: 1,
-                collectionId: "5sela3i08hhb9u8",
+                collectionId: "reward_report",
                 cascadeDelete: false,
             },
         },
@@ -457,7 +457,7 @@ export const CollectionReward = {
     options: {},
 };
 export const CollectionGiftReport = {
-    id: "pzgz9wrl4rk10kq",
+    id: "gift_report",
     name: "Reward Reports",
     type: "base",
     system: false,
@@ -479,7 +479,7 @@ export const CollectionGiftReport = {
     options: {},
 };
 export const CollectionGift = {
-    id: "50lx5fxhb96g1oz",
+    id: "gift",
     name: "Rewards",
     type: "base",
     system: false,
@@ -489,7 +489,7 @@ export const CollectionGift = {
             type: "relation",
             options: {
                 maxSelect: 1,
-                collectionId: "s4r3ipyouaoe4eo",
+                collectionId: "resident_snapshots",
                 cascadeDelete: false,
                 unique: true,
                 metaField: ["name", "household"],
@@ -501,7 +501,7 @@ export const CollectionGift = {
             options: {
                 maxSelect: 1,
                 metaField: ["occasion"],
-                collectionId: "pzgz9wrl4rk10kq",
+                collectionId: "gift_report",
                 cascadeDelete: false,
             },
         },

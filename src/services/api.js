@@ -14,6 +14,8 @@ export class Api {
     static async getAllResidents() {
         const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
             expand: "resident, household",
+            sort: "-created",
+            filter: "active = true"
         });
         return records;
     }

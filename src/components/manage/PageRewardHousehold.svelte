@@ -58,13 +58,16 @@
             let index = records.findIndex((x) => x.householdId == i.household);
             let numReward = CommonHelper.getCorrespondingRewards(reward.education_result);
             if (index == -1) {
-                records.push({
-                    householdId: i.household,
-                    household: households.find((x) => x.id == i.household).address,
-                    reward_received: 1,
-                    id: records.length + 1,
-                    total_cost: reward ? numReward * CommonHelper.costPerReward : 0,
-                });
+                let household = households.find((x) => x.id == i.household)?.address;
+                if (household) {
+                    records.push({
+                        householdId: i.household,
+                        household: household,
+                        reward_received: 1,
+                        id: records.length + 1,
+                        total_cost: reward ? numReward * CommonHelper.costPerReward : 0,
+                    });
+                }
             } else {
                 records[index].reward_received++;
                 records[index].total_cost += reward ? numReward * CommonHelper.costPerReward : 0;
@@ -127,7 +130,7 @@
                 <span class="txt">Thêm trao quà</span>
             </button>
         </div>
-    </div> 
+    </div>
     <CustomSearchBar
         searchField="household"
         placeholder="Tìm hộ khẩu (nhập địa chỉ)"
@@ -136,7 +139,7 @@
             records = baseRecords.filter((x) => x.household.includes(searchVal));
         }}
         on:clear={(e) => {
-            records = [...baseRecords]
+            records = [...baseRecords];
         }}
     />
     <Table

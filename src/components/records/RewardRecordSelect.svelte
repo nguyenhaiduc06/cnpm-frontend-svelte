@@ -156,7 +156,7 @@
                     $autoCancel: false,
                 });
                 const snapshot = await ApiClient.collection("resident_snapshots").getFullList(1, {
-                    filter: `resident="${x.id}"`,
+                    filter: `resident="${x.id}" && active = true`,
                     $autoCancel: false,
                 });
                 x.name = resident.name;
