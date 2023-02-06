@@ -307,7 +307,7 @@
                     >
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{CommonHelper.translateToVN(field.name)}</span>
+                            <span class="txt">{field.name}</span>
                         </div>
                     </SortHeader>
                 {/each}
