@@ -14,11 +14,13 @@
     export let selectPlaceholder;
     export let disable = false;
     export let defaultVal = "";
+    export let existedValues = [];
     export let optionComponent = RecordSelectOption; // custom component to use for each dropdown option item
 
     // custom props
     export let collectionId;
     $: keyOfSelected = disable && defaultVal ? selectPlaceholder : keyOfSelected;
+    $: console.log(existedValues)
 
     let list = [];
     let currentPage = 1;
@@ -125,6 +127,7 @@
                 sort: "-created",
                 $cancelKey: uniqueId + "loadList",
             });
+            result.items = result.items.filter(x => !existedValues.includes(x.id));
 
             if (reset) {
                 list = CommonHelper.toArray(selected).slice();

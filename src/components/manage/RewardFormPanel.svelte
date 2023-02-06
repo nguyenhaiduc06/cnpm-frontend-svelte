@@ -14,7 +14,7 @@
     import FileField from "@/components/records/fields/FileField.svelte";
     import RelationField from "@/components/records/fields/RelationField.svelte";
     import RewardRecordSelect from "../records/RewardRecordSelect.svelte";
-    import { CollectionHouseholds } from "@/utils/database/collections";
+    import { CollectionResidents } from "@/utils/database/collections";
     import RecordSelect from "../records/RecordSelect.svelte";
 
     const dispatch = createEventDispatcher();
@@ -32,7 +32,7 @@
     let record = new Record();
     let uploadedFilesMap = {};
     let deletedFileIndexesMap = {};
-    let householdCollectionId = CollectionHouseholds.id;
+    let residentsCollectionId = CollectionResidents.id;
 
     $: console.log(excludedFields);
     $: console.log(uploadedFilesMap)
@@ -146,11 +146,12 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
+                    {console.log(field.options) || ""}
                     <svelte:component
                         this={relationFieldComponent}
                         {field}
                         bind:value={record[field.name]}
-                        filter={field.options?.collectionId == householdCollectionId ? filter : ""}
+                        filter={field.options?.collectionId == "resident_snapshots" ? filter : ""}
                         excluded={excludedFields[field.name]}
                         recordSelectComponent={field.options?.collectionId == "resident_snapshots" ? RewardRecordSelect : RecordSelect}
                     />
