@@ -37,6 +37,7 @@
     let isLoadingCollection = false;
     let collection = null;
     let upsertPanel;
+    $: console.log(list);
 
     $: if (collectionId) {
         loadCollection();
@@ -150,12 +151,6 @@
                 result.items = result.items.filter((x) => !existedItems.includes(x.resident));
                 result.items.map((x) => (x.id = x.resident));
                 
-                // result.items.map(async (x) => {
-                //     const resident = await ApiClient.collection("residents").getOne(x.id, {
-                //         $$autoCancel: false
-                //     });
-                //     x.name = resident.name;
-                // });
                 for(let x of result.items){
                     const resident = await ApiClient.collection("residents").getOne(x.id, {
                         $autoCancel: false
@@ -165,7 +160,6 @@
                     })
                     x.name = resident.name;
                     x.household = snapshot[0].household;
-                    //console.log(snap)
                 }   
             }  
             list = CommonHelper.filterDuplicatesByKey(

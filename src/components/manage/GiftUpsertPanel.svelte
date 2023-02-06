@@ -21,7 +21,6 @@
     import SelectField from "@/components/records/fields/SelectField.svelte";
     import JsonField from "@/components/records/fields/JsonField.svelte";
     import FileField from "@/components/records/fields/FileField.svelte";
-    import RelationField from "@/components/records/fields/RelationField.svelte";
     import ExternalAuthsList from "@/components/records/ExternalAuthsList.svelte";
     import GiftRelationField from "../records/GiftRelationField.svelte";
     import { CollectionResidentSnapshots, CollectionGift } from "../../utils/database/collections";
@@ -174,7 +173,6 @@
             exportableFields["passwordConfirm"] = true;
             exportableFields["verified"] = true;
         }
-        console.log(data);
 
         // export base fields
         for (const key in data) {

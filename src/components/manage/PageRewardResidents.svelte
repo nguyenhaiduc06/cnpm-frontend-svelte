@@ -3,27 +3,27 @@
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import { CollectionGift } from "../../utils/database/collections";
+    import { CollectionReward } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
-    import GiftUpsertPanel from "./GiftUpsertPanel.svelte";
     import { Api } from "@/services/api";
     import Table from "../base/Table.svelte";
     import CommonHelper from "@/utils/CommonHelper";
+    import RewardFormPanel from "./RewardFormPanel.svelte";
     import BulkBar from "../base/BulkBar.svelte";
+    import { detach } from "svelte/internal";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: reportId = reactiveParams.get("giftreport") || "";
+    $: reportId = reactiveParams.get("rewardreport") || "";
     $: year = reactiveParams.get("year") || "";
-    $: occasion = reactiveParams.get("occasion") || "";
     $: household = reactiveParams.get("household") || "";
 
     let residentUpsertPanel;
     let residentsList;
-    let giftSelectPanel;
+    let rewardSelectPanel;
     let filter;
     let selectedRecords = [];
 
-    $: giftResidents = [];
+    $: rewardedResidents = [];
     $: residents_snaps = [];
     let isLoading;
 
@@ -31,31 +31,32 @@
     load();
     async function load() {
         reactiveParams = new URLSearchParams($querystring);
-        reportId = reactiveParams.get("giftreport") || "";
-        year = reactiveParams.get("year") || "";
-        occasion = reactiveParams.get("occasion") || "";
+        reportId = reactiveParams.get("rewardreport") || "";
         household = reactiveParams.get("household") || "";
         isLoading = true;
 
-        giftResidents = await Api.getGifts(reportId);
+        rewardedResidents = await Api.getRewards(reportId);
         residents_snaps = (await Api.getAllResidents()).filter(
-            (x) => giftResidents.find((n) => n.resident == x.resident) && x.household == household
+            (x) => rewardedResidents.find((n) => n.resident == x.resident) && x.household == household
         );
 
-        giftResidents = giftResidents.filter((x) => residents_snaps.find((n) => n.resident == x.resident));
-        for (let gift of giftResidents) {
-            let residentName = (await Api.getResidentInfo(gift.resident, false)).name;
-            gift.residentName = residentName;
-            gift.cost = gift.num_gift * CommonHelper.costPerGift;
-            gift.occasion = occasion;
+        rewardedResidents = rewardedResidents.filter((x) =>
+            residents_snaps.find((n) => n.resident == x.resident)
+        );
+        for (let resident of rewardedResidents) {
+            let residentName = (await Api.getResidentInfo(resident.resident, false)).name;
+            resident.residentName = residentName;
+            resident.num_reward = CommonHelper.getCorrespondingRewards(resident.education_result);
+            resident.cost = resident.num_reward * CommonHelper.costPerReward;
         }
 
         isLoading = false;
-        giftResidents = giftResidents;
+        console.log(rewardedResidents);
+        rewardedResidents = rewardedResidents;
     }
-    async function deleteSelected(){
-        const gifts = Object.values(selectedRecords);
-        const deleteTasks = gifts.map((x) => Api.deleteGift(x.id));
+    async function deleteSelected() {
+        const rewards = Object.values(selectedRecords);
+        const deleteTasks = rewards.map((x) => Api.deleteReward(x.id));
         selectedRecords = {};
         Promise.all(deleteTasks)
             .then(() => {
@@ -84,7 +85,7 @@
         <button type="button" class="btn btn-outline" on:click={() => {}}>
             {#if reportId}
                 <div class="breadcrumb-item">
-                    Các phần thưởng của hộ {household} trong dịp {occasion} năm {year}
+                    Các phần thưởng của hộ {household} trong dịp năm {year}
                 </div>
             {:else}
                 <span class="txt">Tất cả hộ khẩu</span>
@@ -99,24 +100,37 @@
         </div>
     </div>
     <Table
-        records={giftResidents}
+        records={rewardedResidents}
         fields={[
             {
                 name: "residentName",
                 label: "Tên nhân khẩu",
             },
             {
-                name: "num_gift",
-                label: "Số quà nhận",
+                name: "school",
+                label: "Trường",
             },
             {
-                name: "cost",
-                label: "Chi phí",
+                name: "class",
+                label: "Lớp",
+            },
+            {
+                name: "grade",
+                label: "Khối",
+            },
+            {
+                name: "education_result",
+                label: "Kết quả học tập",
+            },
+            {
+                name: "education_proof",
+                label: "Minh chứng",
+                type: "file"
             },
         ]}
         {isLoading}
         bind:bulkSelected={selectedRecords}
-        on:select={(e) => giftSelectPanel?.show(e?.detail)}
+        on:select={(e) => rewardSelectPanel?.show(e?.detail)}
     />
     <BulkBar
         bulkSelected={selectedRecords}
@@ -124,55 +138,68 @@
     />
 </PageWrapper>
 
-<GiftUpsertPanel
+<RewardFormPanel
     bind:this={residentUpsertPanel}
-    collection={CollectionGift}
-    excludedFields={["gift_report"]}
-    excludedVal={[reportId]}
+    on:submit={async (e) => {
+        const { resident, reward_report, school, grade, education_result, education_proof } = e.detail;
+        console.log(e.detail);
+        await Api.addReward(e.detail);
+        load();
+    }}
     {household}
-    on:save={() => load()}
-    on:delete={() => load()}
-    on:create={(e) => console.log("🚀 create record with data", e.detail.number)}
-    on:update={(e) => console.log("🚀 update record with data", e.detail)}
+    fields={CollectionReward.schema}
+    excludedFields={{
+        reward_report: {
+            fieldName: "reward_report",
+            defaultVal: reportId,
+        },
+    }}
 />
 
 <FormPanel
-    bind:this={giftSelectPanel}
+    bind:this={rewardSelectPanel}
     on:submit={async (e) => {
-        const {gift_report, num_gift, resident, id} = e.detail;
-        await Api.updateGift(id, {gift_report, num_gift, resident})
+        let data = new FormData();
+        for (let i of Object.keys(e.detail)) {
+            data.append(i, e.detail[i]);
+        }
+        await Api.updateReward(e.detail.id, data);
         load();
     }}
     fields={[
         {
-            name: "resident",
-            type: "relation",
-            options: {
-                maxSelect: 1,
-                collectionId: "residents",  
-            },
+            name: "school",
+            type: "text",
         },
         {
-            name: "gift_report",
-            type: "relation",
-            options: {
-                maxSelect: 1,
-                collectionId: "pzgz9wrl4rk10kq",
-            },
+            name: "class",
+            type: "text",
         },
         {
-            name: "num_gift",
+            name: "grade",
             type: "number",
+        },
+        {
+            name: "education_result",
+            type: "select",
+            options: {
+                maxSelect: 1,
+                values: ["Excellent", "Good", "Average", "Bad"],
+            },
+        },
+        {
+            name: "education_proof",
+            type: "file",
         },
     ]}
     excludedFields={{
         resident: {
             fieldName: "resident",
-            defaultVal: undefined
+            defaultVal: undefined,
         },
-        gift_report:{
-            fieldName: "gift_report",
-            defaultVal: reportId
-        }
+        gift_report: {
+            fieldName: "reward_report",
+            defaultVal: reportId,
+        },
     }}
 />

@@ -7,6 +7,9 @@
     export let field = new SchemaField();
     export let value = undefined;
     export let excluded = false;
+    export let recordSelectComponent = RecordSelect;
+    export let existedValues = [];
+    $: console.log($$restProps)
 
     $: isMultiple = field.options?.maxSelect != 1;
     $: if (
@@ -24,15 +27,18 @@
         <i class={CommonHelper.getFieldTypeIcon(field.type)} />
         <span class="txt">{field.name}</span>
     </label>
-    <RecordSelect
+    <svelte:component
+        this={recordSelectComponent}
         toggle
-        disable={excluded.state}
-        defaultValue={excluded.defaultValue}
+        disable={excluded}
+        defaultVal={excluded.defaultVal}
         id={uniqueId}
         multiple={isMultiple}
-        selectPlaceholder={excluded.state ? excluded.defaultVal : "- Select -"}
+        selectPlaceholder={excluded && excluded.defaultVal ? excluded.defaultVal : "- Select -"}
         collectionId={field.options?.collectionId}
         bind:keyOfSelected={value}
+        {existedValues}
+        {...$$restProps}
     />
     {#if field.options?.maxSelect > 1}
         <div class="help-block">Select up to {field.options.maxSelect} items.</div>

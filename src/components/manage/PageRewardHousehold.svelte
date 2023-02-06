@@ -1,19 +1,21 @@
 <script>
     import { querystring } from "svelte-spa-router";
-    import {  push } from "svelte-spa-router";
+    import { push } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import { CollectionGift } from "../../utils/database/collections";
+    import { CollectionGift, CollectionReward } from "../../utils/database/collections";
     import FormPanel from "@/components/base/FormPanel.svelte";
     import GiftUpsertPanel from "./GiftUpsertPanel.svelte";
     import { Api } from "@/services/api";
     import CommonHelper from "@/utils/CommonHelper";
     import Table from "../base/Table.svelte";
     import BulkBar from "../base/BulkBar.svelte";
+    import RewardFormPanel from "./RewardFormPanel.svelte";
+    import RewardHouseholdFormPanel from "./RewardHouseholdFormPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: reportId = reactiveParams.get("giftreport") || "";
+    $: reportId = reactiveParams.get("rewardReport") || "";
     $: year = reactiveParams.get("year") || "";
     $: occasion = reactiveParams.get("occasion") || "";
     let residentUpsertPanel;
@@ -23,11 +25,12 @@
     let filter;
     let sort;
     let rewardList;
-    let records = [];
+
+    $: records = [];
     let selectedHouseholds = [];
     let isLoading;
 
-    let giftResidents;
+    let rewardResidents;
     let residents;
     let households;
 
@@ -36,51 +39,55 @@
     load();
     async function load() {
         reactiveParams = new URLSearchParams($querystring);
-        reportId = reactiveParams.get("giftreport") || "";
+        reportId = reactiveParams.get("rewardreport") || "";
         year = reactiveParams.get("year") || "";
-        occasion = reactiveParams.get("occasion") || "";
         isLoading = true;
 
-        giftResidents = await Api.getGifts(reportId);
+        rewardResidents = await Api.getRewards(reportId);
+
         residents = (await Api.getAllResidents()).filter((x) =>
-            giftResidents.find((n) => n.resident == x.resident)
+            rewardResidents.find((n) => n.resident == x.resident)
         );
         records = [];
         households = await Api.getHouseholds();
+        console.log(rewardResidents);
 
         for (let i of residents) {
-            let gift = giftResidents.find((x) => x.resident == i.resident);
+            let reward = rewardResidents.find((x) => x.resident == i.resident);
             let index = records.findIndex((x) => x.householdId == i.household);
+            let numReward = CommonHelper.getCorrespondingRewards(reward.education_result);
             if (index == -1) {
                 records.push({
                     householdId: i.household,
                     household: households.find((x) => x.id == i.household).address,
-                    gift_received: 1,
+                    reward_received: 1,
                     id: records.length + 1,
-                    total_cost: gift ? gift.num_gift * CommonHelper.costPerGift : 0,
+                    total_cost: reward ? numReward * CommonHelper.costPerReward : 0,
                 });
             } else {
-                records[index].gift_received++;
-                records[index].total_cost += gift ? gift.num_gift * CommonHelper.costPerGift : 0;
+                records[index].reward_received++;
+                records[index].total_cost += reward ? numReward * CommonHelper.costPerReward : 0;
             }
         }
 
         //const giftHouseholds = residents.group(({ household }) => household);
         isLoading = false;
+        reportId = reactiveParams.get("rewardreport") || "";
+        console.log(reportId);
     }
     async function deleteSelectedHouseholds() {
         let deleteTask = [];
         for (let i of selectedHouseholds) {
             if (!i) continue;
             let residentsToDelete = residents.filter((x) => x.household == i.householdId);
-            let giftToDelete = giftResidents.filter((x) =>
+            let rewardsToDelete = rewardResidents.filter((x) =>
                 residentsToDelete.find((n) => n.resident == x.resident)
             );
-            for (let gift of giftToDelete) {
-                deleteTask.push(Api.deleteGift(gift.id));
+            for (let reward of rewardsToDelete) {
+                deleteTask.push(Api.deleteReward(reward.id));
             }
         }
-        selectedHouseholds = {}
+        selectedHouseholds = {};
         Promise.all(deleteTask)
             .then(() => {
                 load();
@@ -114,7 +121,7 @@
         </button>
         <div class="flex-fill" />
         <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => residentUpsertPanel?.show()}>
+            <button type="button" class="btn btn-expanded" on:click={() => rewardSelectPanel?.show()}>
                 <i class="ri-add-line" />
                 <span class="txt">Thêm trao quà</span>
             </button>
@@ -132,8 +139,8 @@
                 label: "Hộ gia đình",
             },
             {
-                name: "gift_received",
-                label: "Số thành viên nhận quà",
+                name: "reward_received",
+                label: "Số thành viên khen thưởng",
             },
             {
                 name: "total_cost",
@@ -144,7 +151,7 @@
         bind:bulkSelected={selectedHouseholds}
         on:select={(e) =>
             push(
-                `/manage/gift-resident?household=${e.detail.householdId}&giftreport=${reportId}&occasion=${occasion}&year=${year}`
+                `/manage/reward-resident?household=${e.detail.householdId}&rewardreport=${reportId}&year=${year}`
             )}
     />
     <BulkBar
@@ -164,8 +171,47 @@
     on:update={(e) => console.log("🚀 update record with data", e.detail)}
 />
 
-<FormPanel
+<!-- <RewardFormPanel
     bind:this={rewardSelectPanel}
-    on:submit={(e) => console.log("FormPanel submitted with data", e.detail)}
-    fields={CollectionGift.schema.filter((field) => field.name == "resident")}
+    on:submit={async (e) => {
+        const {resident, reward_report, school, grade, education_result, education_proof} = e.detail;
+        console.log(e.detail);
+        await Api.addReward(e.detail);
+        load();
+    }}
+    fields={CollectionReward.schema}
+    excludedFields={{
+        reward_report:{
+            fieldName: "reward_report",
+            defaultVal: reportId
+        }
+    }}  
+/> -->
+{console.log(records) || ""}
+<RewardHouseholdFormPanel
+    bind:this={rewardSelectPanel}
+    fields={[
+        {
+            name: "household",
+            type: "relation",
+            options: {
+                collectionId: "households",
+                maxSelect: 1,
+            },
+        },
+    ]}
+    existedHousehold={records.map(x => x.householdId)}
+    on:submit={async (e) => {
+        console.log(e.detail);
+        let household = e.detail.household;
+        records.push({
+            householdId: household,
+            household: households.find((x) => x.id == household).address,
+            reward_received: 0,
+            id: records.length + 1,
+            total_cost: 0,
+        });
+        records = records;
+    }}
+    
 />

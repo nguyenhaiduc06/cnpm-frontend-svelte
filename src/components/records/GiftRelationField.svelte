@@ -40,7 +40,7 @@
         {filter}
         {unique}
         id={uniqueId}
-        multiple={isMultiple}
+        multiple={false}
         selectPlaceholder={excluded.state ? excluded.defaultVal : "- Select -"}
         collectionId={field.options?.collectionId}
         bind:keyOfSelected={value}

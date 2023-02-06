@@ -3,12 +3,15 @@
     import CommonHelper from "@/utils/CommonHelper";
     import tooltip from "@/actions/tooltip";
     import Toggler from "@/components/base/Toggler.svelte";
+    import Searchbar from "./Searchbar.svelte";
+    import RelationSearchBar from "./RelationSearchBar.svelte";
 
     export let id = "";
     export let noOptionsText = "No options found";
     export let selectPlaceholder = "- Select -";
     export let searchPlaceholder = "Search...";
     export let items = [];
+    export let tmpItems = [];
     export let multiple = false;
     export let disabled = false;
     export let selected = multiple ? [] : undefined;
@@ -27,12 +30,12 @@
     let searchTerm = "";
     let container = undefined;
     let labelDiv = undefined;
+    let filter;
 
     $: if (items) {
         ensureSelectedExist();
         resetSearch();
     }
-
     $: filteredItems = filterItems(items, searchTerm);
 
     $: isSelected = function (item) {
@@ -64,10 +67,9 @@
             if (!CommonHelper.inArray(normalized, item)) {
                 selected = [...normalized, item];
             }
-            console.log(selected);
         } else {
             selected = item;
-            
+            console.log(selected);
         }
 
         // emulate native change event
@@ -263,7 +265,11 @@
             <slot name="beforeOptions" />
 
             <div class="options-list">
-                {#each filteredItems as item}
+                <RelationSearchBar searchField="name" on:submit = {(e) => {
+                    filter = e.detail
+                    items = tmpItems.filter(x => filter.value == "" || x[filter.field].includes(filter.value))
+                }}/>
+                {#each items as item}
                     <div
                         tabindex="0"
                         class="dropdown-item option closable"
