@@ -62,6 +62,7 @@
     <GiftReportSearchBar
         autocompleteCollection={CollectionGiftReport}
         searchField="occasion"
+        placeholder="Tìm dịp trao quà"
         on:submit={(e) => (filter = e.detail)}
     />
     <Table

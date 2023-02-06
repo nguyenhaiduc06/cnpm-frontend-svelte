@@ -10,6 +10,7 @@
     import Table from "../base/Table.svelte";
     import CommonHelper from "@/utils/CommonHelper";
     import BulkBar from "../base/BulkBar.svelte";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("giftreport") || "";
@@ -24,6 +25,7 @@
     let selectedRecords = [];
 
     $: giftResidents = [];
+    $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
 
@@ -52,6 +54,7 @@
 
         isLoading = false;
         giftResidents = giftResidents;
+        baseRecords = [...giftResidents];
     }
     async function deleteSelected(){
         const gifts = Object.values(selectedRecords);
@@ -98,6 +101,19 @@
             </button>
         </div>
     </div>
+    
+    <CustomSearchBar 
+        searchField="residentName"
+        placeholder="Tìm nhân khẩu (nhập tên)"
+        on:submit={(e) => {
+            const searchKey = e.detail.residentName;
+            giftResidents = baseRecords.filter(x => x.residentName.includes(searchKey))
+        }}
+        on:clear={(e) => {
+            giftResidents = [...baseRecords]
+        }}
+    />
+    
     <Table
         records={giftResidents}
         fields={[

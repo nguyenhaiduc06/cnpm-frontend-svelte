@@ -12,6 +12,7 @@
     import Table from "../base/Table.svelte";
     import BulkBar from "../base/BulkBar.svelte";
     import CustomFormPanel from "./CustomFormPanel.svelte";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("giftreport") || "";
@@ -22,10 +23,11 @@
     let residentsList;
     let giftSelectPanel;
     let filter;
-    let records = [];
     let selectedHouseholds = [];
     let isLoading;
-
+    
+    $: records = [];
+    $: baseRecords = [];
     let giftResidents;
     let residents;
     let households;
@@ -65,6 +67,8 @@
         }
 
         //const giftHouseholds = residents.group(({ household }) => household);
+        records = records;
+        baseRecords = [...records]
         isLoading = false;
     }
     async function deleteSelectedHouseholds() {
@@ -119,6 +123,19 @@
             </button>
         </div>
     </div>
+    
+    <CustomSearchBar
+        searchField="household"
+        placeholder="Tìm hộ khẩu (nhập địa chỉ)"
+        on:submit={(e) => {
+            const searchVal = e.detail.household || "";
+            records = baseRecords.filter((x) => x.household.includes(searchVal));
+        }}
+        on:clear={(e) => {
+            records = [...baseRecords]
+        }}
+    />
+    
     <Table
         {records}
         fields={[
