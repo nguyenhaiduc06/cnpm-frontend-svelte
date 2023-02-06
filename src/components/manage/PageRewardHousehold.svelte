@@ -115,7 +115,7 @@
     <div class="flex m-b-sm">
         <button type="button" class="btn btn-outline" on:click={() => {}}>
             {#if reportId}
-                <div class="breadcrumb-item">Các phần thưởng trong dịp {occasion} năm {year}</div>
+                <div class="breadcrumb-item">Các hộ có thành viên được khen thưởng trong năm {year}</div>
             {:else}
                 <span class="txt">Tất cả hộ khẩu</span>
             {/if}

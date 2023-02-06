@@ -29,6 +29,9 @@
         </div>
     </header>
     <div class="flex m-b-sm">
+        <button type="button" class="btn btn-outline" on:click={() => {}}>
+            <div class="breadcrumb-item">Danh sách các dịp khen thưởng</div>
+        </button>
         <div class="flex-fill" />
         <div class="btns-group">
             <button type="button" class="btn btn-expanded" on:click={() => householdUpsertPanel?.show()}>

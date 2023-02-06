@@ -87,7 +87,7 @@
         <button type="button" class="btn btn-outline" on:click={() => {}}>
             {#if reportId}
                 <div class="breadcrumb-item">
-                    Các phần thưởng của hộ {household} trong dịp năm {year}
+                    Các thành viên được khen thưởng của hộ {household} trong năm {year}
                 </div>
             {:else}
                 <span class="txt">Tất cả hộ khẩu</span>
