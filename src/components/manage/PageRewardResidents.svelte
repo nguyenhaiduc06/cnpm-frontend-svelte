@@ -40,7 +40,9 @@
             (x) => rewardedResidents.find((n) => n.resident == x.resident) && x.household == household
         );
 
-        rewardedResidents = rewardedResidents.filter((x) => residents_snaps.find((n) => n.resident == x.resident));
+        rewardedResidents = rewardedResidents.filter((x) =>
+            residents_snaps.find((n) => n.resident == x.resident)
+        );
         for (let resident of rewardedResidents) {
             let residentName = (await Api.getResidentInfo(resident.resident, false)).name;
             resident.residentName = residentName;
@@ -52,7 +54,7 @@
         console.log(rewardedResidents);
         rewardedResidents = rewardedResidents;
     }
-    async function deleteSelected(){
+    async function deleteSelected() {
         const rewards = Object.values(selectedRecords);
         const deleteTasks = rewards.map((x) => Api.deleteReward(x.id));
         selectedRecords = {};
@@ -124,7 +126,6 @@
                 name: "education_proof",
                 label: "Minh chứng",
             },
-           
         ]}
         {isLoading}
         bind:bulkSelected={selectedRecords}
@@ -136,66 +137,68 @@
     />
 </PageWrapper>
 
-
 <RewardFormPanel
     bind:this={residentUpsertPanel}
     on:submit={async (e) => {
-        const {resident, reward_report, school, grade, education_result, education_proof} = e.detail;
+        const { resident, reward_report, school, grade, education_result, education_proof } = e.detail;
         console.log(e.detail);
         await Api.addReward(e.detail);
         load();
     }}
-    household={household}
+    {household}
     fields={CollectionReward.schema}
     excludedFields={{
-        reward_report:{
+        reward_report: {
             fieldName: "reward_report",
-            defaultVal: reportId
-        }
+            defaultVal: reportId,
+        },
     }}
-    
 />
 
 <FormPanel
     bind:this={rewardSelectPanel}
     on:submit={async (e) => {
         let data = new FormData();
-        for(let i of Object.keys(e.detail)){
+        for (let i of Object.keys(e.detail)) {
             data.append(i, e.detail[i]);
         }
-        await Api.updateReward(e.detail.id, data)
+        await Api.updateReward(e.detail.id, data);
         load();
     }}
     fields={[
         {
-            name: "resident",
-            type: "relation",
-            options: {
-                maxSelect: 1,
-                collectionId: "residents",  
-            },
+            name: "school",
+            type: "text",
         },
         {
-            name: "gift_report",
-            type: "relation",
-            options: {
-                maxSelect: 1,
-                collectionId: "pzgz9wrl4rk10kq",
-            },
+            name: "class",
+            type: "text",
         },
         {
-            name: "num_gift",
+            name: "grade",
             type: "number",
+        },
+        {
+            name: "education_result",
+            type: "select",
+            options: {
+                maxSelect: 1,
+                values: ["Excellent", "Good", "Average", "Bad"],
+            },
+        },
+        {
+            name: "education_proof",
+            type: "file",
         },
     ]}
     excludedFields={{
         resident: {
             fieldName: "resident",
-            defaultVal: undefined
+            defaultVal: undefined,
         },
-        gift_report:{
+        gift_report: {
             fieldName: "reward_report",
-            defaultVal: reportId
-        }
+            defaultVal: reportId,
+        },
     }}
 />
