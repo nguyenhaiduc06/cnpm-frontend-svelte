@@ -12,7 +12,7 @@
     import Table from "../base/Table.svelte";
     import BulkBar from "../base/BulkBar.svelte";
     import RewardFormPanel from "./RewardFormPanel.svelte";
-    import RewardHouseholdFormPanel from "./RewardHouseholdFormPanel.svelte";
+    import CustomFormPanel from "./CustomFormPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardReport") || "";
@@ -188,7 +188,7 @@
     }}  
 /> -->
 {console.log(records) || ""}
-<RewardHouseholdFormPanel
+<CustomFormPanel
     bind:this={rewardSelectPanel}
     fields={[
         {

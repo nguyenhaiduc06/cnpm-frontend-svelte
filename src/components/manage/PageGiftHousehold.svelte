@@ -11,18 +11,17 @@
     import CommonHelper from "@/utils/CommonHelper";
     import Table from "../base/Table.svelte";
     import BulkBar from "../base/BulkBar.svelte";
+    import CustomFormPanel from "./CustomFormPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("giftreport") || "";
     $: year = reactiveParams.get("year") || "";
     $: occasion = reactiveParams.get("occasion") || "";
+    
     let residentUpsertPanel;
     let residentsList;
-    let rewardUpsertPanel;
-    let rewardSelectPanel;
+    let giftSelectPanel;
     let filter;
-    let sort;
-    let rewardList;
     let records = [];
     let selectedHouseholds = [];
     let isLoading;
@@ -114,7 +113,7 @@
         </button>
         <div class="flex-fill" />
         <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => residentUpsertPanel?.show()}>
+            <button type="button" class="btn btn-expanded" on:click={() => giftSelectPanel?.show()}>
                 <i class="ri-add-line" />
                 <span class="txt">Thêm trao quà</span>
             </button>
@@ -153,19 +152,30 @@
     />
 </PageWrapper>
 
-<GiftUpsertPanel
-    bind:this={residentUpsertPanel}
-    collection={CollectionGift}
-    excludedFields={["gift_report"]}
-    excludedVal={[reportId]}
-    on:save={() => load()}
-    on:delete={() => load()}
-    on:create={(e) => console.log("🚀 create record with data", e.detail.number)}
-    on:update={(e) => console.log("🚀 update record with data", e.detail)}
-/>
-
-<FormPanel
-    bind:this={rewardSelectPanel}
-    on:submit={(e) => console.log("FormPanel submitted with data", e.detail)}
-    fields={CollectionGift.schema.filter((field) => field.name == "resident")}
+<CustomFormPanel
+    bind:this={giftSelectPanel}
+    fields={[
+        {
+            name: "household",
+            type: "relation",
+            options: {
+                collectionId: "households",
+                maxSelect: 1,
+            },
+        },
+    ]}
+    existedHousehold={records.map(x => x.householdId)}
+    on:submit={async (e) => {
+        console.log(e.detail);
+        let household = e.detail.household;
+        records.push({
+            householdId: household,
+            household: households.find((x) => x.id == household).address,
+            gift_received: 0,
+            id: records.length + 1,
+            total_cost: 0,
+        });
+        records = records;
+    }}
+    
 />
