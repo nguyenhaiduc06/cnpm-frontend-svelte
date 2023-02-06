@@ -121,4 +121,20 @@ export class Api {
         
         return result;
     }
+
+    static async getAbsentResidents() {
+        const result = await ApiClient.collection("absent_residents").getFullList(200, {
+            expand: "resident",
+        });
+        return result.map((r) => ({
+            id: r.id,
+            name: r.expand.resident?.name,
+            from: r.from,
+            to: r.to,
+        }));
+    }
+    
+    static async createAbsentResident(data) {
+        await ApiClient.collection("absent_residents").create(data);
+    }
 }

@@ -205,10 +205,6 @@
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">Thường trú</div>
         </nav>
-
-        <div class="inline-flex">
-            <RefreshButton on:refresh={() => residentsTable?.load()} />
-        </div>
     </header>
     <div class="flex m-b-sm">
         <button type="button" class="btn btn-expanded" on:click={() => addResidentFormPanel?.show()}>
