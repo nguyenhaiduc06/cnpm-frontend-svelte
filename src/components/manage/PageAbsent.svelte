@@ -1,20 +1,13 @@
 <script>
     import { CollectionAbsentResidents } from "@/utils/database/collections";
     import PageWrapper from "../base/PageWrapper.svelte";
-    import RecordsList from "../records/RecordsList.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import RefreshButton from "../base/RefreshButton.svelte";
-    import RecordUpsertPanel from "../records/RecordUpsertPanel.svelte";
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import FormPanel from "../base/FormPanel.svelte";
     import { addSuccessToast } from "@/stores/toasts";
 
-    const collection = CollectionAbsentResidents;
-    let recordsList;
-    let recordUpsertPanel;
     let addAbsentResidentFormPanel;
-
     let isLoading;
     let records;
 
@@ -67,11 +60,4 @@
     bind:this={addAbsentResidentFormPanel}
     fields={CollectionAbsentResidents.schema}
     on:submit={(e) => addAbsentResident(e.detail)}
-/>
-
-<RecordUpsertPanel
-    bind:this={recordUpsertPanel}
-    {collection}
-    on:save={() => recordsList?.reloadLoadedPages()}
-    on:delete={() => recordsList?.reloadLoadedPages()}
 />
