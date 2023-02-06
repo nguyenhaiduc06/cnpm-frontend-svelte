@@ -125,6 +125,7 @@
             {
                 name: "education_proof",
                 label: "Minh chứng",
+                type: "file"
             },
         ]}
         {isLoading}
