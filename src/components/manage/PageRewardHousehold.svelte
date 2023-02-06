@@ -49,7 +49,7 @@
             rewardResidents.find((n) => n.resident == x.resident)
         );
         records = [];
-        households = await Api.getHouseholds();
+        households = await Api.getHouseholds({});
         console.log(rewardResidents);
 
         for (let i of residents) {

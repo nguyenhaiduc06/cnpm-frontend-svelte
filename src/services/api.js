@@ -40,7 +40,7 @@ export class Api {
     }
 
     static async getHouseholds({filter}) {
-        const records = await ApiClient.collection("households").getFullList(200, {filter});
+        const records = await ApiClient.collection("households").getFullList(200, {filter: filter || ""});
 
         return records.map((record) => ({
             id: record.id,

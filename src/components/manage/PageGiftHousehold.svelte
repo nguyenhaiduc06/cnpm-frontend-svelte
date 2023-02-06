@@ -46,7 +46,7 @@
             giftResidents.find((n) => n.resident == x.resident)
         );
         records = [];
-        households = await Api.getHouseholds();
+        households = await Api.getHouseholds({});
 
         for (let i of residents) {
             let gift = giftResidents.find((x) => x.resident == i.resident);
