@@ -166,7 +166,6 @@
     ]}
     existedHousehold={records.map(x => x.householdId)}
     on:submit={async (e) => {
-        console.log(e.detail);
         let household = e.detail.household;
         records.push({
             householdId: household,

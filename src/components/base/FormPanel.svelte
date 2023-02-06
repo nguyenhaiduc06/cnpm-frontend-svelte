@@ -88,7 +88,6 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    {console.log(field.name, record[field.name]) || ""}
                     <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]}/>
                 {/if}
             {/each}

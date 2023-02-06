@@ -69,7 +69,6 @@
             }
         } else {
             selected = item;
-            console.log(selected);
         }
 
         // emulate native change event

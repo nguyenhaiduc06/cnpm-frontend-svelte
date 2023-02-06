@@ -150,7 +150,6 @@
                 result.items = result.items.filter((x) => !existedItems.includes(x.resident));
             }
             result.items.map((x) => (x.id = x.resident));
-            console.log(result.items);
 
             for (let x of result.items) {
                 const resident = await ApiClient.collection("residents").getOne(x.id, {

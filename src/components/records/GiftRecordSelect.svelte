@@ -37,7 +37,6 @@
     let isLoadingCollection = false;
     let collection = null;
     let upsertPanel;
-    $: console.log(list);
 
     $: if (collectionId) {
         loadCollection();

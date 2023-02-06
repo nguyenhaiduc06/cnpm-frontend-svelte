@@ -51,7 +51,6 @@
         }
 
         isLoading = false;
-        console.log(rewardedResidents);
         rewardedResidents = rewardedResidents;
     }
     async function deleteSelected() {
@@ -142,7 +141,6 @@
     bind:this={residentUpsertPanel}
     on:submit={async (e) => {
         const { resident, reward_report, school, grade, education_result, education_proof } = e.detail;
-        console.log(e.detail);
         await Api.addReward(e.detail);
         load();
     }}

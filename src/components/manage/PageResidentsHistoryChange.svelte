@@ -25,7 +25,6 @@
       Api.getResidentChange().then((result) => {
         residentChanges = result.map(record => {
           const {id, change_type} = record;
-          console.log(record);
           const { resident, old_household, new_household} = record.expand;
           const {name, citizen_id} = resident;
           const from = old_household.address;

@@ -50,7 +50,6 @@
         );
         records = [];
         households = await Api.getHouseholds({});
-        console.log(rewardResidents);
 
         for (let i of residents) {
             let reward = rewardResidents.find((x) => x.resident == i.resident);
@@ -73,7 +72,6 @@
         //const giftHouseholds = residents.group(({ household }) => household);
         isLoading = false;
         reportId = reactiveParams.get("rewardreport") || "";
-        console.log(reportId);
     }
     async function deleteSelectedHouseholds() {
         let deleteTask = [];
@@ -171,23 +169,6 @@
     on:update={(e) => console.log("🚀 update record with data", e.detail)}
 />
 
-<!-- <RewardFormPanel
-    bind:this={rewardSelectPanel}
-    on:submit={async (e) => {
-        const {resident, reward_report, school, grade, education_result, education_proof} = e.detail;
-        console.log(e.detail);
-        await Api.addReward(e.detail);
-        load();
-    }}
-    fields={CollectionReward.schema}
-    excludedFields={{
-        reward_report:{
-            fieldName: "reward_report",
-            defaultVal: reportId
-        }
-    }}  
-/> -->
-{console.log(records) || ""}
 <CustomFormPanel
     bind:this={rewardSelectPanel}
     fields={[
@@ -202,7 +183,6 @@
     ]}
     existedHousehold={records.map(x => x.householdId)}
     on:submit={async (e) => {
-        console.log(e.detail);
         let household = e.detail.household;
         records.push({
             householdId: household,
