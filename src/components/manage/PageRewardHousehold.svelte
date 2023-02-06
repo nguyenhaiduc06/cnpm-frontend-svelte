@@ -1,6 +1,6 @@
 <script>
     import { querystring } from "svelte-spa-router";
-    import {  push } from "svelte-spa-router";
+    import { push } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
@@ -12,6 +12,7 @@
     import Table from "../base/Table.svelte";
     import BulkBar from "../base/BulkBar.svelte";
     import RewardFormPanel from "./RewardFormPanel.svelte";
+    import RewardHouseholdFormPanel from "./RewardHouseholdFormPanel.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardReport") || "";
@@ -24,7 +25,8 @@
     let filter;
     let sort;
     let rewardList;
-    let records = [];
+
+    $: records = [];
     let selectedHouseholds = [];
     let isLoading;
 
@@ -42,7 +44,7 @@
         isLoading = true;
 
         rewardResidents = await Api.getRewards(reportId);
-        
+
         residents = (await Api.getAllResidents()).filter((x) =>
             rewardResidents.find((n) => n.resident == x.resident)
         );
@@ -85,7 +87,7 @@
                 deleteTask.push(Api.deleteReward(reward.id));
             }
         }
-        selectedHouseholds = {}
+        selectedHouseholds = {};
         Promise.all(deleteTask)
             .then(() => {
                 load();
@@ -169,7 +171,7 @@
     on:update={(e) => console.log("🚀 update record with data", e.detail)}
 />
 
-<RewardFormPanel
+<!-- <RewardFormPanel
     bind:this={rewardSelectPanel}
     on:submit={async (e) => {
         const {resident, reward_report, school, grade, education_result, education_proof} = e.detail;
@@ -183,6 +185,33 @@
             fieldName: "reward_report",
             defaultVal: reportId
         }
+    }}  
+/> -->
+{console.log(records) || ""}
+<RewardHouseholdFormPanel
+    bind:this={rewardSelectPanel}
+    fields={[
+        {
+            name: "household",
+            type: "relation",
+            options: {
+                collectionId: "households",
+                maxSelect: 1,
+            },
+        },
+    ]}
+    existedHousehold={records.map(x => x.householdId)}
+    on:submit={async (e) => {
+        console.log(e.detail);
+        let household = e.detail.household;
+        records.push({
+            householdId: household,
+            household: households.find((x) => x.id == household).address,
+            reward_received: 0,
+            id: records.length + 1,
+            total_cost: 0,
+        });
+        records = records;
     }}
     
 />
