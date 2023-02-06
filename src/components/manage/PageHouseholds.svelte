@@ -7,18 +7,21 @@
     import { Api } from "@/services/api";
     import { addErrorToast, addSuccessToast } from "@/stores/toasts";
     import BulkBar from "../base/BulkBar.svelte";
+    import Searchbar from "../base/Searchbar.svelte";
 
     let addHouseholdFormPanel;
 
     let isLoading;
     let households;
     let selectedHouseholds = {};
+    let search = "";
+    $: filter = search ? `number ~ "${search}" || address ~ "${search}"` : "";
 
-    load();
+    $: load({ filter });
 
-    async function load() {
+    async function load({ filter }) {
         isLoading = true;
-        households = await Api.getHouseholds();
+        households = await Api.getHouseholds({ filter });
         isLoading = false;
     }
 
@@ -62,11 +65,13 @@
             <span class="txt">Nhập sổ hộ khẩu</span>
         </button>
         <div class="flex-fill" />
-        <button type="button" class="btn btn-outline" on:click={() => {}}>
+        <!-- <button type="button" class="btn btn-outline" on:click={() => {}}>
             <i class="ri-filter-line" />
             <span class="txt">Lọc</span>
-        </button>
+        </button> -->
     </div>
+
+    <Searchbar placeholder="Tìm hộ khẩu theo số, địa chỉ" bind:value={search} />
 
     <Table
         records={households}

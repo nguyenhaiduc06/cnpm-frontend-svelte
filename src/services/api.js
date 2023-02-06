@@ -39,8 +39,8 @@ export class Api {
         return ApiClient.collection("resident_snapshots").create(data);
     }
 
-    static async getHouseholds() {
-        const records = await ApiClient.collection("households").getFullList(200, {});
+    static async getHouseholds({filter}) {
+        const records = await ApiClient.collection("households").getFullList(200, {filter});
 
         return records.map((record) => ({
             id: record.id,
