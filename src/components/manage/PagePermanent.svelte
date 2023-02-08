@@ -1,7 +1,6 @@
 <script>
     import { link, querystring, replace } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
-    import RefreshButton from "@/components/base/RefreshButton.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import {
         CollectionHouseholds,
@@ -13,56 +12,44 @@
 
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
-    import { fly } from "svelte/transition";
     import { addErrorToast, addSuccessToast } from "@/stores/toasts";
+    import BulkBar from "../base/BulkBar.svelte";
+    import { Record } from "pocketbase";
+    import Searchbar from "../base/Searchbar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: householdId = reactiveParams.get("householdId") || "";
 
-    let residentsTable;
     let addResidentFormPanel;
     let updateResidentFormPanel;
     let addHouseholdFormPanel;
     let selectHouseholdFormPanel;
-    let filterFormPanel;
+    let filterByHouseholdFormPanel;
 
-    $: filter = householdId ? `household ="${householdId}"` : "";
     let isLoading = true;
-    let residents;
-    let selectedResidents = {};
-    $: totalSelectedResidents = Object.keys(selectedResidents).length;
+    let search;
+    let records = [];
+    $: regex = new RegExp(`${search}.*`);
+    $: console.log(regex, "abc".match(regex))
+    $: filteredRecords = records.filter((r) => {
+        const { name, citizen_id, address } = r;
+        return name.toLowerCase().match(regex) || citizen_id.toLowerCase().match(regex) || address.toLowerCase().match(regex);
+    });
+    let bulkSelected;
 
-    $: householdId, load();
+    load();
 
-    function load() {
+    async function load() {
         isLoading = true;
-        Api.getResidents(householdId).then((result) => {
-            console.log(result);
-            residents = result.map((record) => {
-                const { id, relation_with_householder } = record;
-                const { resident, household } = record.expand;
-                const { name, birthday, citizen_id } = resident ?? {};
-                const { number, address } = household ?? {};
-                return {
-                    id,
-                    name,
-                    birthday,
-                    number,
-                    address,
-                    citizen_id,
-                    relation_with_householder,
-                };
-            });
-            isLoading = false;
-        });
+        records = await Api.getPermanentResidents({ filter: "active = true" });
+        isLoading = false;
     }
 
-    function updateFilter(filter) {
-        const { household } = filter;
-        if (!household) {
+    function filterByHousehold(householdId) {
+        if (!householdId) {
             return;
         }
-        replace(`/manage/residents?householdId=${household}`);
+        replace(`/manage/residents?householdId=${householdId}`);
     }
 
     async function registerPermanent(data) {
@@ -89,7 +76,6 @@
     }
 
     async function changeHousehold(data) {
-        const bulkSelected = selectedResidents;
         try {
             const { household } = data;
             await Promise.all(
@@ -160,9 +146,8 @@
         }
     }
 
-    async function maskAsDead(data) {
+    async function markAsDead(data) {
         //TODO: alert
-        const bulkSelected = selectedResidents;
         try {
             const { household } = data;
             await Promise.all(
@@ -221,14 +206,18 @@
             <span class="txt">Thống kê</span>
         </a>
         <div class="flex-fill" />
-        <button type="button" class="btn btn-outline" on:click={() => filterFormPanel.show()}>
+        <button type="button" class="btn btn-outline" on:click={() => filterByHouseholdFormPanel.show()}>
             <i class="ri-filter-line" />
             <span class="txt">{householdId ? `Hộ khẩu ${householdId}` : "Tất cả hộ khẩu"}</span>
         </button>
     </div>
 
+    <Searchbar placeholder="Tìm kiếm theo tên, CCCD, địa chỉ" bind:value={search} />
+
     <Table
-        records={residents}
+        {isLoading}
+        records={filteredRecords}
+        bind:bulkSelected
         fields={[
             {
                 name: "citizen_id",
@@ -255,60 +244,29 @@
                 label: "Quan hệ với chủ hộ",
             },
         ]}
-        {isLoading}
-        bind:bulkSelected={selectedResidents}
         on:select={(e) => updateResidentFormPanel?.show(e.detail)}
     />
 
-    {#if totalSelectedResidents}
-        <div class="bulkbar" transition:fly|local={{ duration: 150, y: 5 }}>
-            <div class="txt">
-                Selected <strong>{totalSelectedResidents}</strong>
-                {totalSelectedResidents === 1 ? "record" : "records"}
-            </div>
-            <div class="flex-fill" />
-            <button
-                type="button"
-                class="btn btn-sm btn-secondary"
-                on:click={() => addHouseholdFormPanel?.show()}
-            >
-                <span class="txt">Tách khẩu</span>
-            </button>
-            <button
-                type="button"
-                class="btn btn-sm btn-secondary"
-                on:click={() => selectHouseholdFormPanel?.show()}
-            >
-                <span class="txt">Chuyển khẩu</span>
-            </button>
-            <button
-                type="button"
-                class="btn btn-sm btn-secondary btn-danger"
-                on:click={() => maskAsDead(selectedResidents)}
-            >
-                <span class="txt">Khai tử</span>
-            </button>
-        </div>
-    {/if}
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Tách khẩu",
+                onClick: () => addHouseholdFormPanel?.show(),
+            },
+            {
+                label: "Chuyển khẩu",
+                onClick: () => selectHouseholdFormPanel?.show(),
+            },
+            {
+                label: "Khai tử",
+                onClick: () => markAsDead(bulkSelected),
+                isDanger: true,
+            },
+        ]}
+    />
 </PageWrapper>
 
-<!-- <RecordUpsertPanel
-    bind:this={residentUpsertPanel}
-    collection={CollectionResidentSnapshots}
-    on:save={() => residentsList?.reloadLoadedPages()}
-    on:delete={() => residentsList?.reloadLoadedPages()}
-    on:create={(e) => createResident(e.detail)}
-    on:update={(e) => updateResident(e.detail)}
-/>
-
-<RecordUpsertPanel
-    bind:this={householdUpsertPanel}
-    collection={CollectionHouseholds}
-    on:save={() => residentsList?.reloadLoadedPages()}
-    on:delete={() => residentsList?.reloadLoadedPages()}
-    on:create={(e) => splitHousehold(e.detail)}
-    on:update={(e) => console.log("🚀 update record with data", e.detail)}
-/> -->
 <FormPanel
     bind:this={addResidentFormPanel}
     title="Đăng kí thường trú"
@@ -345,8 +303,8 @@
 />
 
 <FormPanel
-    bind:this={filterFormPanel}
+    bind:this={filterByHouseholdFormPanel}
     title="Filter"
     fields={CollectionResidentSnapshots.schema.filter((field) => field.name == "household")}
-    on:submit={(e) => updateFilter(e.detail)}
+    on:submit={(e) => filterByHousehold(e.detail.household)}
 />

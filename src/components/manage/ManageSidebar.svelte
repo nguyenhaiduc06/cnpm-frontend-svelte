@@ -17,7 +17,7 @@
             href="/manage/permanent"
             class="sidebar-list-item"
             use:link
-            use:active={{ path: "/manage/residents.*", className: "active" }}
+            use:active={{ path: "/manage/permanent.*", className: "active" }}
         >
             <span class="txt">Thường trú</span>
         </a>
@@ -38,15 +38,15 @@
             <span class="txt">Tạm trú</span>
         </a>
         <a
-            href="/manage/reward-report"
+            href="/manage/reward-reports"
             class="sidebar-list-item"
             use:link
-            use:active={{ path: "/manage/reward-report.*", className: "active" }}
+            use:active={{ path: "/manage/reward-reports.*", className: "active" }}
         >
             <span class="txt">Khen thưởng</span>
         </a>
         <a
-            href="/manage/gift-report"
+            href="/manage/gift-reports"
             class="sidebar-list-item"
             use:link
             use:active={{ path: "/manage/gift-report.*", className: "active" }}

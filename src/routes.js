@@ -13,6 +13,10 @@ import PageResidentHistoryChange
                              from "./components/manage/PageResidentsHistoryChange.svelte";
 import PageAbsent            from "@/components/manage/PageAbsent.svelte";
 import PageTemporary         from "@/components/manage/PageTemporary.svelte";
+import PageRewardReports from "./components/manage/PageRewardReports.svelte";
+import PageRewards from "./components/manage/PageRewards.svelte";
+import PageGiftReports from "./components/manage/PageGiftReports.svelte";
+import PageGifts from "./components/manage/PageGifts.svelte";
 import PageAdmins            from "@/components/admins/PageAdmins.svelte";
 import PageAdminLogin        from "@/components/admins/PageAdminLogin.svelte";
 import PageApplication       from "@/components/settings/PageApplication.svelte";
@@ -22,14 +26,6 @@ import PageAuthProviders     from "@/components/settings/PageAuthProviders.svelt
 import PageTokenOptions      from "@/components/settings/PageTokenOptions.svelte";
 import PageExportCollections from "@/components/settings/PageExportCollections.svelte";
 import PageImportCollections from "@/components/settings/PageImportCollections.svelte";
-import PageReward            from "./components/manage/PageReward.svelte";
-import PageRewardReport      from "./components/manage/PageRewardReport.svelte";
-import PageGift              from "./components/manage/PageGift.svelte";
-import PageGiftReport        from "./components/manage/PageGiftReport.svelte";
-import PageGiftHousehold     from "./components/manage/PageGiftHousehold.svelte";
-import PageGiftResident      from "./components/manage/PageGiftResident.svelte";
-import PageRewardHousehold from "./components/manage/PageRewardHousehold.svelte";
-import PageRewardResidents from "./components/manage/PageRewardResidents.svelte";
 
 const baseConditions = [
     async (details) => {
@@ -115,36 +111,50 @@ const routes = {
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
-    "/manage/reward": wrap({
-        component: PageRewardHousehold,
+
+    "/manage/reward-reports": wrap({
+        component: PageRewardReports,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
-    "/manage/reward-resident": wrap({
-        component: PageRewardResidents,
+
+    "/manage/rewards": wrap({
+        component: PageRewards,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
-    "/manage/reward-report": wrap({
-        component: PageRewardReport,
+
+    "/manage/gift-reports": wrap({
+        component: PageGiftReports,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
-    "/manage/gift": wrap({
-        component: PageGiftHousehold,
+
+    "/manage/gifts": wrap({
+        component: PageGifts,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
-    "/manage/gift-report": wrap({
-        component: PageGiftReport,
-        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
-        userData: { showAppSidebar: true },
-    }),
-    "/manage/gift-resident": wrap({
-        component: PageGiftResident,
-        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
-        userData: { showAppSidebar: true },
-    }),
+    // "/manage/reward-resident": wrap({
+    //     component: PageRewardResidents,
+    //     conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+    //     userData: { showAppSidebar: true },
+    // }),
+    // "/manage/gift": wrap({
+    //     component: PageGiftHousehold,
+    //     conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+    //     userData: { showAppSidebar: true },
+    // }),
+    // "/manage/gift-report": wrap({
+    //     component: PageGiftReport,
+    //     conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+    //     userData: { showAppSidebar: true },
+    // }),
+    // "/manage/gift-resident": wrap({
+    //     component: PageGiftResident,
+    //     conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+    //     userData: { showAppSidebar: true },
+    // }),
 
     "/logs": wrap({
         component: PageLogs,

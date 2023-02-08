@@ -29,7 +29,8 @@
     let deletedFileIndexesMap = {};
 
     function submit() {
-        dispatch("submit", record);
+        const data = exportFormData();
+        dispatch("submit", data);
         hide();
     }
 
@@ -51,6 +52,49 @@
         }
         uploadedFilesMap = {};
         deletedFileIndexesMap = {};
+    }
+
+    function exportFormData() {
+        const data = record?.export() || {};
+        const formData = new FormData();
+
+        const exportableFields = {};
+        for (const field of fields || []) {
+            exportableFields[field.name] = true;
+        }
+
+        // export base fields
+        for (const key in data) {
+            // skip non-schema fields
+            if (!exportableFields[key]) {
+                continue;
+            }
+
+            // normalize nullable values
+            if (typeof data[key] === "undefined") {
+                data[key] = null;
+            }
+
+            CommonHelper.addValueToFormData(formData, key, data[key]);
+        }
+
+        // add uploaded files  (if any)
+        for (const key in uploadedFilesMap) {
+            const files = CommonHelper.toArray(uploadedFilesMap[key]);
+            for (const file of files) {
+                formData.append(key, file);
+            }
+        }
+
+        // unset deleted files (if any)
+        for (const key in deletedFileIndexesMap) {
+            const indexes = CommonHelper.toArray(deletedFileIndexesMap[key]);
+            for (const index of indexes) {
+                formData.append(key + "." + index, "");
+            }
+        }
+
+        return formData;
     }
 </script>
 

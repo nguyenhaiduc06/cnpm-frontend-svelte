@@ -1,4 +1,5 @@
 import ApiClient from "../utils/ApiClient";
+import { Record } from "pocketbase";
 
 export class Api {
     static async getResidents(householdId) {
@@ -11,11 +12,37 @@ export class Api {
 
         return result;
     }
+
+    static async getPermanentResidents({ filter }) {
+        const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
+            filter,
+            sort: "-created",
+            expand: "resident, household",
+        });
+
+        return records.map((record) => {
+            const { id, relation_with_householder } = record;
+            const { resident, household } = record.expand;
+            const { id: residentId, name, birthday, citizen_id } = resident ?? {};
+            const { number, address } = household ?? {};
+            return new Record({
+                id,
+                name,
+                birthday,
+                number,
+                address,
+                citizen_id,
+                relation_with_householder,
+                resident: residentId,
+            });
+        });
+    }
+
     static async getAllResidents() {
         const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
             expand: "resident, household",
             sort: "-created",
-            filter: "active = true"
+            filter: "active = true",
         });
         return records;
     }
@@ -57,20 +84,41 @@ export class Api {
         await ApiClient.collection("households").delete(household.id);
     }
 
+    //---gift---
     static async getGiftReports() {
-        const records = await ApiClient.collection("gift_report").getFullList(200, {});
-        return records;
-    }
-    static async deleteGiftReport(report) {
-        await ApiClient.collection("gift_report").delete(report.id);
-    }
-    static async getGifts(reportId) {
-        const records = await ApiClient.collection("gift").getFullList(200, {
-            filter: `gift_report="${reportId}"`,
-            expand:"resident"
+        const records = await ApiClient.collection("gift_report").getFullList(200, {
+            sort: "-created",
         });
         return records;
     }
+
+    static async getGiftReportById(reportId) {
+        const record = await ApiClient.collection("gift_report").getOne(reportId);
+        return record;
+    }
+
+    static async createGiftReport(reportData) {
+        await ApiClient.collection("gift_report").create(reportData);
+    }
+
+    static async deleteGiftReport(report) {
+        await ApiClient.collection("gift_report").delete(report.id);
+    }
+
+    static async getGifts({ filter }) {
+        const records = await ApiClient.collection("gift").getFullList(200, {
+            sort: "-created",
+            filter,
+            expand: "resident",
+        });
+        return records.map((record) => {
+            const { id, expand } = record;
+            const { resident } = expand;
+            const { name } = resident;
+            return new Record({ id, name });
+        });
+    }
+
     static async deleteGift(giftId) {
         const result = await ApiClient.collection("gift").delete(giftId);
         return result;
@@ -79,20 +127,49 @@ export class Api {
         await ApiClient.collection("gift").update(giftId, data);
     }
 
+    //---END
+
     static async getRewardReports() {
-        const records = await ApiClient.collection("reward_report").getFullList(200, {});
-        return records;
-    }
-    static async deleteRewardReport(report) {
-        await ApiClient.collection("reward_report").delete(report.id);
-    }
-    static async getRewards(reportId) {
-        const records = await ApiClient.collection("reward").getFullList(200, {
-            filter: `reward_report="${reportId}"`,
-            expand:"resident"
+        const records = await ApiClient.collection("reward_report").getFullList(200, {
+            sort: "-created",
         });
         return records;
     }
+
+    static async getRewardReportById(id) {
+        const record = await ApiClient.collection("reward_report").getOne(id);
+        return record;
+    }
+
+    static async deleteRewardReport(report) {
+        await ApiClient.collection("reward_report").delete(report.id);
+    }
+
+    static async getRewards({ filter }) {
+        const records = await ApiClient.collection("reward").getFullList(200, {
+            filter,
+            sort: "-created",
+            expand: "resident",
+        });
+        return records.map((record) => {
+            const { id, school, grade, education_result, education_proof, expand } = record;
+            const { resident } = expand;
+            const { name } = resident;
+            return new Record({
+                id,
+                name,
+                school,
+                grade,
+                education_result,
+                education_proof,
+            });
+        });
+    }
+
+    static async createReward(rewardData) {
+        await ApiClient.collection("reward").create(rewardData);
+    }
+
     static async deleteReward(rewardId) {
         const result = await ApiClient.collection("reward").delete(rewardId);
         return result;
