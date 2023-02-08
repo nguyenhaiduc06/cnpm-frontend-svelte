@@ -8,6 +8,7 @@
     import { Chart, registerables } from "chart.js";
     import "chartjs-adapter-luxon";
     import { Api } from "@/services/api";
+    import ResidentSnapshotsByTime from "./ResidentSnapshotsByTime.svelte";
     let genderChartCanvas;
     let ageChartCanvas;
     let chartInst;
@@ -93,6 +94,16 @@
         <div class="col-lg-6 panel">
             <h1>Độ tuổi</h1>
             <canvas bind:this={ageChartCanvas} class="chart-canvas" style="height: 250px; width: 100%;" />;
+        </div>
+        <div class="col-lg-6 panel">
+            <h1>Tạm trú</h1>
+        </div>
+        <div class="col-lg-6 panel">
+            <h1>Tạm vắng</h1>
+        </div>
+        <div class="col-lg-12 panel">
+            <h1>Nhân khẩu theo thời gian</h1>
+            <ResidentSnapshotsByTime />
         </div>
     </div>
 </PageWrapper>
