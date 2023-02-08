@@ -40,7 +40,6 @@
         }
 
         selected = multiple ? newSelected : newSelected[0];
-        console.log(selected);
     }
 
     async function handleSelectedChange(newSelected) {

@@ -9,7 +9,6 @@
     export let excluded = false;
     export let recordSelectComponent = RecordSelect;
     export let existedValues = [];
-    $: console.log($$restProps)
 
     $: isMultiple = field.options?.maxSelect != 1;
     $: if (

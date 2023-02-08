@@ -119,10 +119,10 @@
         let request;
         if (record.isNew) {
             dispatch("create", data);
-            // request = ApiClient.collection(collection.id).create(data);
+            request = ApiClient.collection(collection.id).create(data);
         } else {
             dispatch("update", {record, data});
-            // request = ApiClient.collection(collection.id).update(record.id, data);
+            request = ApiClient.collection(collection.id).update(record.id, data);
         }
 
         //return;

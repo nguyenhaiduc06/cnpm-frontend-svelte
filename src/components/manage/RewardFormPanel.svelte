@@ -34,16 +34,8 @@
     let deletedFileIndexesMap = {};
     let residentsCollectionId = CollectionResidents.id;
 
-    $: console.log(excludedFields);
-    $: console.log(uploadedFilesMap)
     function submit() {
         let data = exportFormData();
-        for(let i of Object.keys(uploadedFilesMap)){
-            record[i] = uploadedFilesMap[i][0];
-        }
-        for(let pair of data.entries()){
-            console.log(pair[0], pair[1])
-        }
         dispatch("submit", data);
         hide();
     }
@@ -76,8 +68,6 @@
         for (const field of fields || []) {
             exportableFields[field.name] = true;
         }
-
-        console.log(data);
         // export base fields
         for (const key in data) {
             // skip non-schema fields
@@ -146,7 +136,6 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    {console.log(field.options) || ""}
                     <svelte:component
                         this={relationFieldComponent}
                         {field}

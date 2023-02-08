@@ -309,15 +309,6 @@
                     {/if}
                 </th>
 
-                <!-- {#if !hiddenColumns.includes("@id")}
-                    <SortHeader class="col-type-text col-field-id" name="id" bind:sort>
-                        <div class="col-header-content">
-                            <i class={CommonHelper.getFieldTypeIcon("primary")} />
-                            <span class="txt">id</span>
-                        </div>
-                    </SortHeader>
-                {/if} -->
-
                 {#if collection.isAuth}
                     {#if !hiddenColumns.includes("@username")}
                         <SortHeader class="col-type-text col-field-id" name="username" bind:sort>
@@ -345,7 +336,7 @@
                     >
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{CommonHelper.translateToVN(field.name)}</span>
+                            <span class="txt">{field.name}</span>
                         </div>
                     </SortHeader>
                 {/each}

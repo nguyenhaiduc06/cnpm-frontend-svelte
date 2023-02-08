@@ -132,10 +132,16 @@
         try {
             const page = reset ? 1 : currentPage + 1;
 
-            const result = await ApiClient.collection(collectionId).getList(page, 200, {
+            const snapshots = await ApiClient.collection(collectionId).getList(page, 200, {
                 sort: "-created",
-                filter: filter,
+                filter:
+                    collectionId == "resident_snapshots"
+                        ? filter
+                            ? `${filter} && active = true`
+                            : "active = true"
+                        : filter,
                 $cancelKey: uniqueId + "loadList",
+                expand: "resident, household, gift",
             });
 
             if (reset) {
@@ -147,27 +153,18 @@
             });
             if (unique && unique.length > 0) {
                 const existedItems = rewardList.items.map((x) => x[unique]);
-                result.items = result.items.filter((x) => !existedItems.includes(x.resident));
+                snapshots.items = snapshots.items.filter((x) => !existedItems.includes(x.resident));
             }
-            result.items.map((x) => (x.id = x.resident));
-            console.log(result.items);
+            snapshots.items.map((x) => (x.id = x.resident));
+            snapshots.items.map((x) => {
+                (x.name = x.expand.resident.name), (x.household = x.expand.household.address);
+            });
 
-            for (let x of result.items) {
-                const resident = await ApiClient.collection("residents").getOne(x.id, {
-                    $autoCancel: false,
-                });
-                const snapshot = await ApiClient.collection("resident_snapshots").getFullList(1, {
-                    filter: `resident="${x.id}"`,
-                    $autoCancel: false,
-                });
-                x.name = resident.name;
-                x.household = snapshot[0].household;
-            }
             list = CommonHelper.filterDuplicatesByKey(
-                list.concat(result.items, CommonHelper.toArray(selected))
+                list.concat(snapshots.items, CommonHelper.toArray(selected))
             );
-            currentPage = result.page;
-            totalItems = result.totalItems;
+            currentPage = snapshots.page;
+            totalItems = snapshots.totalItems;
         } catch (err) {
             ApiClient.errorResponseHandler(err);
         }

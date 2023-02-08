@@ -37,6 +37,7 @@
     function load() {
         isLoading = true;
         Api.getResidents(householdId).then((result) => {
+            console.log(result);
             residents = result.map((record) => {
                 const { id, relation_with_householder } = record;
                 const { resident, household } = record.expand;

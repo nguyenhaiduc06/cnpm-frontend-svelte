@@ -337,7 +337,7 @@
                     <SortHeader class="col-type-text col-field-id" name="id" bind:sort>
                         <div class="col-header-content">
                             <i class={CommonHelper.getFieldTypeIcon("primary")} />
-                            <span class="txt">{CommonHelper.translateToVN("id")}</span>
+                            <span class="txt">id</span>
                         </div>
                     </SortHeader>
                 {/if}
@@ -368,8 +368,8 @@
                         bind:sort
                     >
                         <div class="col-header-content">
-                            <i class={CommonHelper.getFieldTypeIcon(field.type)} />
-                            <span class="txt">{CommonHelper.translateToVN(field.name)}</span>
+                            <i class={field.type} />
+                            <span class="txt">{field.name}</span>
                         </div>
                     </SortHeader>
                 {/each}

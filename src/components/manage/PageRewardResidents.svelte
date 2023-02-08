@@ -11,6 +11,7 @@
     import RewardFormPanel from "./RewardFormPanel.svelte";
     import BulkBar from "../base/BulkBar.svelte";
     import { detach } from "svelte/internal";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("rewardreport") || "";
@@ -23,11 +24,13 @@
     let filter;
     let selectedRecords = [];
 
-    $: rewardedResidents = [];
+    $: records = [];
+    $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
 
     $: filter = reportId ? `household ="${household}"` : "";
+    $: console.trace(records)
     load();
     async function load() {
         reactiveParams = new URLSearchParams($querystring);
@@ -35,7 +38,7 @@
         household = reactiveParams.get("household") || "";
         isLoading = true;
 
-        rewardedResidents = await Api.getRewards(reportId);
+        let rewardedResidents = await Api.getRewards(reportId);
         residents_snaps = (await Api.getAllResidents()).filter(
             (x) => rewardedResidents.find((n) => n.resident == x.resident) && x.household == household
         );
@@ -44,15 +47,15 @@
             residents_snaps.find((n) => n.resident == x.resident)
         );
         for (let resident of rewardedResidents) {
-            let residentName = (await Api.getResidentInfo(resident.resident, false)).name;
+            let residentName = resident.expand.resident.name;
             resident.residentName = residentName;
             resident.num_reward = CommonHelper.getCorrespondingRewards(resident.education_result);
             resident.cost = resident.num_reward * CommonHelper.costPerReward;
         }
 
+        records = rewardedResidents;
+        baseRecords = [...rewardedResidents];
         isLoading = false;
-        console.log(rewardedResidents);
-        rewardedResidents = rewardedResidents;
     }
     async function deleteSelected() {
         const rewards = Object.values(selectedRecords);
@@ -85,7 +88,7 @@
         <button type="button" class="btn btn-outline" on:click={() => {}}>
             {#if reportId}
                 <div class="breadcrumb-item">
-                    Các phần thưởng của hộ {household} trong dịp năm {year}
+                    Các thành viên được khen thưởng của hộ {household} trong năm {year}
                 </div>
             {:else}
                 <span class="txt">Tất cả hộ khẩu</span>
@@ -99,8 +102,19 @@
             </button>
         </div>
     </div>
+    <CustomSearchBar 
+        searchField="residentName"
+        placeholder="Tìm nhân khẩu (nhập tên)"
+        on:submit={(e) => {
+            const searchKey = e.detail.residentName;
+            records = baseRecords.filter(x => x.residentName.includes(searchKey))
+        }}
+        on:clear={(e) => {
+            records = [...baseRecords]
+        }}
+    />
     <Table
-        records={rewardedResidents}
+        records={records}
         fields={[
             {
                 name: "residentName",
@@ -142,7 +156,6 @@
     bind:this={residentUpsertPanel}
     on:submit={async (e) => {
         const { resident, reward_report, school, grade, education_result, education_proof } = e.detail;
-        console.log(e.detail);
         await Api.addReward(e.detail);
         load();
     }}

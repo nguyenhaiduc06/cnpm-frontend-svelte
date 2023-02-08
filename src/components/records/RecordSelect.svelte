@@ -20,8 +20,6 @@
     // custom props
     export let collectionId;
     $: keyOfSelected = disable && defaultVal ? selectPlaceholder : keyOfSelected;
-    $: console.log(existedValues)
-
     let list = [];
     let currentPage = 1;
     let totalItems = 0;

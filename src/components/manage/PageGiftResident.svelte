@@ -10,6 +10,7 @@
     import Table from "../base/Table.svelte";
     import CommonHelper from "@/utils/CommonHelper";
     import BulkBar from "../base/BulkBar.svelte";
+    import CustomSearchBar from "../base/CustomSearchBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
     $: reportId = reactiveParams.get("giftreport") || "";
@@ -23,7 +24,8 @@
     let filter;
     let selectedRecords = [];
 
-    $: giftResidents = [];
+    $: records = [];
+    $: baseRecords = [];
     $: residents_snaps = [];
     let isLoading;
 
@@ -37,21 +39,22 @@
         household = reactiveParams.get("household") || "";
         isLoading = true;
 
-        giftResidents = await Api.getGifts(reportId);
+        let giftResidents = await Api.getGifts(reportId);
         residents_snaps = (await Api.getAllResidents()).filter(
             (x) => giftResidents.find((n) => n.resident == x.resident) && x.household == household
         );
 
         giftResidents = giftResidents.filter((x) => residents_snaps.find((n) => n.resident == x.resident));
         for (let gift of giftResidents) {
-            let residentName = (await Api.getResidentInfo(gift.resident, false)).name;
+            let residentName = gift.expand.resident.name;
             gift.residentName = residentName;
             gift.cost = gift.num_gift * CommonHelper.costPerGift;
             gift.occasion = occasion;
         }
 
         isLoading = false;
-        giftResidents = giftResidents;
+        records = giftResidents;
+        baseRecords = [...giftResidents];
     }
     async function deleteSelected(){
         const gifts = Object.values(selectedRecords);
@@ -98,8 +101,21 @@
             </button>
         </div>
     </div>
+    
+    <CustomSearchBar 
+        searchField="residentName"
+        placeholder="Tìm nhân khẩu (nhập tên)"
+        on:submit={(e) => {
+            const searchKey = e.detail.residentName;
+            records = baseRecords.filter(x => x.residentName.includes(searchKey))
+        }}
+        on:clear={(e) => {
+            records = [...baseRecords]
+        }}
+    />
+    
     <Table
-        records={giftResidents}
+        records={records}
         fields={[
             {
                 name: "residentName",

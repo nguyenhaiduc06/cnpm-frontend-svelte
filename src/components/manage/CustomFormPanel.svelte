@@ -29,7 +29,6 @@
     let uploadedFilesMap = {};
     let deletedFileIndexesMap = {};
     
-    $: console.log(existedHousehold)
 
     function submit() {
         dispatch("submit", record);
@@ -91,7 +90,6 @@
                         bind:deletedFileIndexes={deletedFileIndexesMap[field.name]}
                     />
                 {:else if field.type === "relation"}
-                    {console.log(existedHousehold) || ""}
                     <RelationField {field} bind:value={record[field.name]} excluded={excludedFields[field.name]} existedValues={existedHousehold}/>
                 {/if}
             {/each}

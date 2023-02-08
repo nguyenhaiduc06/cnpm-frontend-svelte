@@ -43,7 +43,6 @@
 
         return CommonHelper.inArray(normalized, item);
     };
-    $: console.log(items);
 
     // Selection handlers
     // ---------------------------------------------------------------
@@ -70,7 +69,6 @@
             }
         } else {
             selected = item;
-            console.log(selected);
         }
 
         // emulate native change event
