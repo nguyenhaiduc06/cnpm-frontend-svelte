@@ -23,9 +23,9 @@ export class Api {
         const records = await ApiClient.collection("residents").getFullList(200, {});
         return records;
     }
-    static async getResidentInfo(residentId, autoCancel = true){
+    static async getResidentInfo(residentId, autoCancel = true) {
         const result = await ApiClient.collection("residents").getOne(residentId, {
-            $autoCancel: autoCancel
+            $autoCancel: autoCancel,
         });
         return result;
     }
@@ -41,14 +41,12 @@ export class Api {
         return ApiClient.collection("resident_snapshots").create(data);
     }
 
-    static async getHouseholds({filter}) {
-        const records = await ApiClient.collection("households").getFullList(200, {filter: filter || ""});
-
-        return records.map((record) => ({
-            id: record.id,
-            number: record.number,
-            address: record.address,
-        }));
+    static async getHouseholds({ filter }) {
+        const records = await ApiClient.collection("households").getFullList(200, {
+            sort: "-created",
+            filter,
+        });
+        return records;
     }
 
     static async createHousehold(householdData) {
@@ -58,7 +56,7 @@ export class Api {
     static async deleteHousehold(household) {
         await ApiClient.collection("households").delete(household.id);
     }
-    
+
     static async getGiftReports() {
         const records = await ApiClient.collection("gift_report").getFullList(200, {});
         return records;
@@ -77,11 +75,10 @@ export class Api {
         const result = await ApiClient.collection("gift").delete(giftId);
         return result;
     }
-    static async updateGift(giftId, data){
+    static async updateGift(giftId, data) {
         await ApiClient.collection("gift").update(giftId, data);
     }
-    
-    
+
     static async getRewardReports() {
         const records = await ApiClient.collection("reward_report").getFullList(200, {});
         return records;
@@ -100,16 +97,16 @@ export class Api {
         const result = await ApiClient.collection("reward").delete(rewardId);
         return result;
     }
-    static async updateReward(rewardId, data){
+    static async updateReward(rewardId, data) {
         await ApiClient.collection("reward").update(rewardId, data);
     }
-    static async addReward(data){
+    static async addReward(data) {
         let result = await ApiClient.collection("reward").create(data);
         return result;
     }
-    
+
     static async updateResidentSnapshot(id, data) {
-        return ApiClient.collection("resident_snapshots").update(id, data)
+        return ApiClient.collection("resident_snapshots").update(id, data);
     }
 
     static async createResidentChange(data) {
@@ -122,7 +119,41 @@ export class Api {
             filter,
             expand: "resident,old_household,new_household",
         });
-        
         return result;
+    }
+
+    static async getAbsentResidents() {
+        const result = await ApiClient.collection("absent_residents").getFullList(200, {
+            sort: "-created",
+            expand: "resident",
+        });
+        return result.map((r) => ({
+            id: r.id,
+            name: r.expand.resident?.name,
+            from: r.from,
+            to: r.to,
+        }));
+    }
+
+    static async createAbsentResident(data) {
+        await ApiClient.collection("absent_residents").create(data);
+    }
+
+    static async getTemporaryResidents() {
+        const result = await ApiClient.collection("temporary_residents").getFullList(200, {
+            sort: "-created",
+            expand: "resident",
+        });
+        return result.map((r) => ({
+            id: r.id,
+            name: r.expand.resident?.name,
+            from: r.from,
+            to: r.to,
+            address: r.address,
+        }));
+    }
+
+    static async createTemporaryResident(data) {
+        await ApiClient.collection("temporary_residents").create(data);
     }
 }

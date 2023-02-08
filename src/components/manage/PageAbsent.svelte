@@ -1,14 +1,29 @@
 <script>
     import { CollectionAbsentResidents } from "@/utils/database/collections";
     import PageWrapper from "../base/PageWrapper.svelte";
-    import RecordsList from "../records/RecordsList.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import RefreshButton from "../base/RefreshButton.svelte";
-    import RecordUpsertPanel from "../records/RecordUpsertPanel.svelte";
+    import Table from "../base/Table.svelte";
+    import { Api } from "@/services/api";
+    import FormPanel from "../base/FormPanel.svelte";
+    import { addSuccessToast } from "@/stores/toasts";
 
-    const collection = CollectionAbsentResidents;
-    let recordsList;
-    let recordUpsertPanel;
+    let addAbsentResidentFormPanel;
+    let isLoading;
+    let records;
+
+    load();
+
+    async function load() {
+        isLoading = true;
+        records = await Api.getAbsentResidents();
+        isLoading = false;
+    }
+
+    async function addAbsentResident(data) {
+        await Api.createAbsentResident(data);
+        addSuccessToast(`Đã đăng ký tạm vắng`);
+        load();
+    }
 </script>
 
 <ManageSidebar />
@@ -18,26 +33,31 @@
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">Tạm vắng</div>
         </nav>
-
-        <div class="inline-flex">
-            <RefreshButton on:refresh={() => recordsList?.load()} />
-        </div>
     </header>
     <div class="flex m-b-sm">
-        <div class="flex-fill" />
-        <div class="btns-group">
-            <button type="button" class="btn btn-expanded" on:click={() => recordUpsertPanel?.show()}>
-                <i class="ri-add-line" />
-                <span class="txt">Đăng kí tạm vắng</span>
-            </button>
-        </div>
+        <button type="button" class="btn btn-expanded" on:click={() => addAbsentResidentFormPanel?.show()}>
+            <i class="ri-add-line" />
+            <span class="txt">Đăng kí tạm vắng</span>
+        </button>
     </div>
-    <RecordsList bind:this={recordsList} {collection} on:select={(e) => recordUpsertPanel?.show(e.detail)} />
+
+    <Table
+        {records}
+        fields={[
+            { name: "name", label: "Tên" },
+            {
+                name: "from",
+                label: "Từ ngày",
+            },
+            { name: "to", label: "Tới ngày" },
+        ]}
+        {isLoading}
+    />
 </PageWrapper>
 
-<RecordUpsertPanel
-    bind:this={recordUpsertPanel}
-    {collection}
-    on:save={() => recordsList?.reloadLoadedPages()}
-    on:delete={() => recordsList?.reloadLoadedPages()}
+<FormPanel
+    title="Đăng ký tạm vắng"
+    bind:this={addAbsentResidentFormPanel}
+    fields={CollectionAbsentResidents.schema}
+    on:submit={(e) => addAbsentResident(e.detail)}
 />

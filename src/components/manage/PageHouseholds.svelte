@@ -10,6 +10,7 @@
     import Searchbar from "../base/Searchbar.svelte";
 
     let addHouseholdFormPanel;
+    let viewHouseholdDetailFormPanel;
 
     let isLoading;
     let households;
@@ -87,6 +88,7 @@
         ]}
         {isLoading}
         bind:bulkSelected={selectedHouseholds}
+        on:select={(e) => viewHouseholdDetailFormPanel?.show(e.detail)}
     />
 
     <BulkBar
@@ -100,4 +102,10 @@
     title="Nhập sổ hộ khẩu"
     fields={CollectionHouseholds.schema.filter((s) => ["number", "address"].includes(s.name))}
     on:submit={(e) => addHousehold(e.detail)}
+/>
+
+<FormPanel
+    bind:this={viewHouseholdDetailFormPanel}
+    title="Chi tiết sổ hộ khẩu"
+    fields={CollectionHouseholds.schema}
 />
