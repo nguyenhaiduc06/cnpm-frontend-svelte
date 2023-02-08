@@ -199,6 +199,43 @@ export class Api {
         return result;
     }
 
+    static async getHouseholdIdByResidentId() {
+        const records = await ApiClient.collection("resident_snapshots").getFullList(200, {
+            expand: "resident, household",
+        });
+        const result = {};
+        for (const record of records) {
+            const { expand } = record;
+            const { resident, household } = expand;
+            result[resident?.id] = household?.id;
+        }
+        return result;
+    }
+
+    static async getResidentChanges({ filter }) {
+        const records = await ApiClient.collection("resident_changes").getFullList(200, {
+            filter,
+            sort: "-created",
+            expand: "resident, old_household, new_household",
+        });
+        return records.map((record) => {
+            const { id, change_type, expand } = record;
+            const { resident, old_household, new_household } = expand;
+            const { name } = resident;
+            const { id: old_household_id, address: old_address } = old_household;
+            const { id: new_household_id, address: new_address } = new_household;
+            return new Record({
+                id,
+                name,
+                change_type,
+                old_household: old_household_id,
+                new_household: new_household_id,
+                old_address,
+                new_address,
+            });
+        });
+    }
+
     static async getAbsentResidents() {
         const result = await ApiClient.collection("absent_residents").getFullList(200, {
             sort: "-created",

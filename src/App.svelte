@@ -101,12 +101,12 @@
                     <i class="ri-database-2-line" />
                 </a>
                 <a
-                    href="/logs"
+                    href="/stats/residents"
                     class="menu-item"
-                    aria-label="Logs"
+                    aria-label="Thống kê"
                     use:link
-                    use:active={{ path: "/logs/?.*", className: "current-route" }}
-                    use:tooltip={{ text: "Logs", position: "right" }}
+                    use:active={{ path: "/stats/?.*", className: "current-route" }}
+                    use:tooltip={{ text: "Thống kê", position: "right" }}
                 >
                     <i class="ri-line-chart-line" />
                 </a>

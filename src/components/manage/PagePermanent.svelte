@@ -197,14 +197,10 @@
             <i class="ri-add-line" />
             <span class="txt">Đăng kí thường trú</span>
         </button>
-        <a class="btn btn-outline" href="/manage/residents/historyChange" use:link>
+        <!-- <a class="btn btn-outline" href="/manage/residents/historyChange" use:link>
             <i class="ri-history-line" />
             <span class="txt">Lịch sử thay đổi</span>
-        </a>
-        <a class="btn btn-outline" href="/manage/residents/report" use:link>
-            <i class="ri-pie-chart-line" />
-            <span class="txt">Thống kê</span>
-        </a>
+        </a> -->
         <div class="flex-fill" />
         <button type="button" class="btn btn-outline" on:click={() => filterByHouseholdFormPanel.show()}>
             <i class="ri-filter-line" />

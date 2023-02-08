@@ -1,29 +1,34 @@
-import { replace }           from "svelte-spa-router";
-import { wrap }              from "svelte-spa-router/wrap";
-import ApiClient             from "@/utils/ApiClient";
-import PageIndex             from "@/components/PageIndex.svelte";
-import PageLogs              from "@/components/logs/PageLogs.svelte";
-import PageRecords           from "@/components/records/PageRecords.svelte";
-import PageManage            from "@/components/manage/PageManage.svelte";
-import PageHouseholds        from "@/components/manage/PageHouseholds.svelte";
-import PageResidents         from "@/components/manage/PageResidents.svelte";
-import PagePermanent         from "@/components/manage/PagePermanent.svelte";
-import PageResidentsReport   from "./components/manage/PageResidentsReport.svelte";
-import PageResidentHistoryChange 
-                             from "./components/manage/PageResidentsHistoryChange.svelte";
-import PageAbsent            from "@/components/manage/PageAbsent.svelte";
-import PageTemporary         from "@/components/manage/PageTemporary.svelte";
+import { replace } from "svelte-spa-router";
+import { wrap } from "svelte-spa-router/wrap";
+import ApiClient from "@/utils/ApiClient";
+import PageIndex from "@/components/PageIndex.svelte";
+import PageLogs from "@/components/logs/PageLogs.svelte";
+import PageRecords from "@/components/records/PageRecords.svelte";
+import PageManage from "@/components/manage/PageManage.svelte";
+import PageHouseholds from "@/components/manage/PageHouseholds.svelte";
+import PageResidents from "@/components/manage/PageResidents.svelte";
+import PagePermanent from "@/components/manage/PagePermanent.svelte";
+import PageResidentsReport from "./components/manage/PageResidentsReport.svelte";
+import PageResidentHistoryChange from "./components/manage/PageResidentsHistoryChange.svelte";
+import PageAbsent from "@/components/manage/PageAbsent.svelte";
+import PageTemporary from "@/components/manage/PageTemporary.svelte";
 import PageRewardReports from "./components/manage/PageRewardReports.svelte";
 import PageRewards from "./components/manage/PageRewards.svelte";
 import PageGiftReports from "./components/manage/PageGiftReports.svelte";
 import PageGifts from "./components/manage/PageGifts.svelte";
-import PageAdmins            from "@/components/admins/PageAdmins.svelte";
-import PageAdminLogin        from "@/components/admins/PageAdminLogin.svelte";
-import PageApplication       from "@/components/settings/PageApplication.svelte";
-import PageMail              from "@/components/settings/PageMail.svelte";
-import PageStorage           from "@/components/settings/PageStorage.svelte";
-import PageAuthProviders     from "@/components/settings/PageAuthProviders.svelte";
-import PageTokenOptions      from "@/components/settings/PageTokenOptions.svelte";
+
+import PageResidentsStats from "./components/stats/PageResidentsStats.svelte";
+import PageResidentChanges from "./components/stats/PageResidentChanges.svelte";
+import PageRewardsStats from "./components/stats/PageRewardsStats.svelte";
+import PageGiftsStats from "./components/stats/PageGiftsStats.svelte";
+
+import PageAdmins from "@/components/admins/PageAdmins.svelte";
+import PageAdminLogin from "@/components/admins/PageAdminLogin.svelte";
+import PageApplication from "@/components/settings/PageApplication.svelte";
+import PageMail from "@/components/settings/PageMail.svelte";
+import PageStorage from "@/components/settings/PageStorage.svelte";
+import PageAuthProviders from "@/components/settings/PageAuthProviders.svelte";
+import PageTokenOptions from "@/components/settings/PageTokenOptions.svelte";
 import PageExportCollections from "@/components/settings/PageExportCollections.svelte";
 import PageImportCollections from "@/components/settings/PageImportCollections.svelte";
 
@@ -95,7 +100,7 @@ const routes = {
     }),
 
     "/manage/residents/historyChange": wrap({
-        component: PageResidentHistoryChange,        
+        component: PageResidentHistoryChange,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
@@ -135,6 +140,31 @@ const routes = {
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
     }),
+
+    "/stats/residents": wrap({
+        component: PageResidentsStats,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/stats/resident-changes": wrap({
+        component: PageResidentChanges,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/stats/rewards": wrap({
+        component: PageRewardsStats,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
+    "/stats/gifts": wrap({
+        component: PageGiftsStats,
+        conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
+        userData: { showAppSidebar: true },
+    }),
+
     // "/manage/reward-resident": wrap({
     //     component: PageRewardResidents,
     //     conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
