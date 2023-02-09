@@ -18,7 +18,13 @@
     import Searchbar from "../base/Searchbar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: householdId = reactiveParams.get("householdId") || "";
+    $: householdId = reactiveParams.get("household-id") || "";
+    let household;
+    $: if (householdId) {
+        Api.getHouseholdById(householdId).then((record) => (household = record));
+    } else {
+        household = undefined;
+    }
 
     let addResidentFormPanel;
     let updateResidentFormPanel;
@@ -54,7 +60,7 @@
         if (!householdId) {
             return;
         }
-        replace(`/manage/permanent?householdId=${householdId}`);
+        replace(`/manage/permanent?household-id=${householdId}`);
     }
 
     async function registerPermanent(data) {
@@ -194,7 +200,14 @@
     <header class="page-header">
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
-            <div class="breadcrumb-item">Thường trú</div>
+            <div class="breadcrumb-item">
+                <a href="/manage/permanent" use:link>
+                    <span>Thường trú</span>
+                </a>
+            </div>
+            {#if household}
+                <div class="breadcrumb-item">Hộ khẩu số {household?.number ?? ""}</div>
+            {/if}
         </nav>
     </header>
     <div class="flex m-b-sm">
@@ -227,6 +240,10 @@
             {
                 name: "name",
                 label: "Họ và tên",
+            },
+            {
+                name: "gender",
+                label: "Giới tính",
             },
             {
                 name: "birthday",

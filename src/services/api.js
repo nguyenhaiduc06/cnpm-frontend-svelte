@@ -23,11 +23,12 @@ export class Api {
         return records.map((record) => {
             const { id, relation_with_householder } = record;
             const { resident, household } = record.expand;
-            const { id: residentId, name, birthday, citizen_id } = resident ?? {};
+            const { id: residentId, name, gender, birthday, citizen_id } = resident ?? {};
             const { number, address } = household ?? {};
             return new Record({
                 id,
                 name,
+                gender,
                 birthday,
                 number,
                 address,

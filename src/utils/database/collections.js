@@ -254,7 +254,7 @@ export const CollectionResidents = {
             unique: false,
             options: {
                 maxSelect: 1,
-                values: ["nam", "nữ"],
+                values: ["Nam", "Nữ"],
             },
         },
         {
