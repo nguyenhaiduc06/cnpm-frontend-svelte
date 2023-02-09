@@ -14,22 +14,21 @@
 
     let isLoading;
     let households;
-    let selectedHouseholds = {};
+    let bulkSelected = {};
     let search = "";
-    $: filter = search ? `number ~ "${search}" || address ~ "${search}"` : "";
 
-    $: load({ filter });
+    $: search, load();
 
-    async function load({ filter }) {
+    async function load() {
         isLoading = true;
-        households = await Api.getHouseholds({ filter });
+        households = await Api.getHouseholds({ filter: `number ~ "${search}" || address ~ "${search}"` });
         isLoading = false;
     }
 
     async function addHousehold(data) {
         try {
             await Api.createHousehold(data);
-            addSuccessToast(`Đã thêm hộ khẩu số ${data.number}`);
+            addSuccessToast(`Đã thêm hộ khẩu số ${data.get("number")}`);
             load();
         } catch (e) {
             addErrorToast(e.message);
@@ -38,16 +37,11 @@
     }
 
     async function deleteSelectedHouseholds() {
-        const households = Object.values(selectedHouseholds);
-        const deleteTasks = households.map((household) => Api.deleteHousehold(household));
-        selectedHouseholds = {};
-        Promise.all(deleteTasks)
-            .then(() => {
-                load();
-            })
-            .catch((e) => {
-                addErrorToast(e.message);
-            });
+        const selectedHouseholds = Object.values(bulkSelected);
+        const deleteTasks = selectedHouseholds.map((household) => Api.deleteHousehold(household));
+        await Promise.all(deleteTasks);
+        bulkSelected = {};
+        load();
     }
 </script>
 
@@ -66,10 +60,6 @@
             <span class="txt">Nhập sổ hộ khẩu</span>
         </button>
         <div class="flex-fill" />
-        <!-- <button type="button" class="btn btn-outline" on:click={() => {}}>
-            <i class="ri-filter-line" />
-            <span class="txt">Lọc</span>
-        </button> -->
     </div>
 
     <Searchbar placeholder="Tìm hộ khẩu theo số, địa chỉ" bind:value={search} />
@@ -87,14 +77,11 @@
             },
         ]}
         {isLoading}
-        bind:bulkSelected={selectedHouseholds}
+        bind:bulkSelected
         on:select={(e) => viewHouseholdDetailFormPanel?.show(e.detail)}
     />
 
-    <BulkBar
-        bulkSelected={selectedHouseholds}
-        actions={[{ label: "Xóa", onClick: deleteSelectedHouseholds, isDanger: true }]}
-    />
+    <BulkBar {bulkSelected} actions={[{ label: "Xóa", onClick: deleteSelectedHouseholds, isDanger: true }]} />
 </PageWrapper>
 
 <FormPanel
