@@ -1,5 +1,5 @@
 <script>
-    import { querystring } from "svelte-spa-router";
+    import { querystring, replace } from "svelte-spa-router";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
     import { CollectionReward } from "../../utils/database/collections";
@@ -7,6 +7,7 @@
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import { Record } from "pocketbase";
+    import { link } from "svelte-spa-router";
 
     $: reactiveParams = new URLSearchParams($querystring);
 
@@ -14,9 +15,9 @@
     let rewardReport;
     $: Api.getRewardReportById(rewardReportId).then((record) => (rewardReport = record));
 
-    $: householdId = reactiveParams.get("household-id") ?? "";
+    $: householdId = reactiveParams.get("household-id");
     let household;
-    $: Api.getHouseholdById(householdId).then((record) => (household = record));
+    $: householdId && Api.getHouseholdById(householdId).then((record) => (household = record));
 
     let addRewardFormPanel;
     let filterByHouseholdFormPanel;
@@ -46,9 +47,17 @@
     <header class="page-header">
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
-            <div class="breadcrumb-item">Khen thưởng</div>
-            <div class="breadcrumb-item">{rewardReport?.name ?? ""}</div>
-            {#if household?.number}
+            <div class="breadcrumb-item">
+                <a href="/manage/reward-reports" use:link>
+                    <span>Khen thưởng</span>
+                </a>
+            </div>
+            <div class="breadcrumb-item">
+                <a href={`/manage/rewards?reward-report-id=${rewardReport?.id}`} use:link>
+                    <span>{rewardReport?.name ?? ""}</span>
+                </a>
+            </div>
+            {#if household}
                 <div class="breadcrumb-item">Hộ khẩu số {household?.number ?? ""}</div>
             {/if}
         </nav>
@@ -130,6 +139,8 @@
     title="Chọn hộ khẩu"
     fields={CollectionReward.schema.filter((field) => ["household"].includes(field.name))}
     on:submit={(e) => {
-        householdId = e.detail.get("household");
+        replace(
+            `/manage/rewards?reward-report-id=${rewardReport?.id}&household-id=${e.detail.get("household")}`
+        );
     }}
 />
