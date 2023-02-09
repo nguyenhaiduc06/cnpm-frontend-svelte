@@ -6,6 +6,7 @@
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import FormPanel from "../base/FormPanel.svelte";
+    import BulkBar from "../base/BulkBar.svelte";
 
     let addGiftReportFormPanel;
 
@@ -19,6 +20,13 @@
         isLoading = true;
         records = await Api.getGiftReports();
         isLoading = false;
+    }
+
+    async function deleteSelected() {
+        const selectedIds = Object.keys(bulkSelected);
+        await Promise.all(selectedIds.map((id) => Api.deleteGiftReportById(id)));
+        bulkSelected = {};
+        load();
     }
 </script>
 
@@ -49,6 +57,17 @@
             },
         ]}
         on:select={(e) => replace(`/manage/gifts?gift-report-id=${e.detail.id}`)}
+    />
+
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Xóa",
+                onClick: deleteSelected,
+                isDanger: true,
+            },
+        ]}
     />
 </PageWrapper>
 

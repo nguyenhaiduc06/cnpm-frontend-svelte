@@ -107,8 +107,8 @@ export class Api {
         await ApiClient.collection("gift_report").create(reportData);
     }
 
-    static async deleteGiftReport(report) {
-        await ApiClient.collection("gift_report").delete(report.id);
+    static async deleteGiftReportById(id) {
+        await ApiClient.collection("gift_report").delete(id);
     }
 
     static async getGifts({ filter }) {
@@ -135,9 +135,8 @@ export class Api {
         await ApiClient.collection("gift").create(giftData);
     }
 
-    static async deleteGift(giftId) {
-        const result = await ApiClient.collection("gift").delete(giftId);
-        return result;
+    static async deleteGiftById(id) {
+        await ApiClient.collection("gift").delete(id);
     }
     static async updateGift(giftId, data) {
         await ApiClient.collection("gift").update(giftId, data);
@@ -161,8 +160,8 @@ export class Api {
         await ApiClient.collection("reward_report").create(rewardReportData);
     }
 
-    static async deleteRewardReport(report) {
-        await ApiClient.collection("reward_report").delete(report.id);
+    static async deleteRewardReportById(id) {
+        await ApiClient.collection("reward_report").delete(id);
     }
 
     static async getRewards({ filter }) {
@@ -214,10 +213,10 @@ export class Api {
         await ApiClient.collection("reward").create(rewardData);
     }
 
-    static async deleteReward(rewardId) {
-        const result = await ApiClient.collection("reward").delete(rewardId);
-        return result;
+    static async deleteRewardById(id) {
+        await ApiClient.collection("reward").delete(id);
     }
+
     static async updateReward(rewardId, data) {
         await ApiClient.collection("reward").update(rewardId, data);
     }

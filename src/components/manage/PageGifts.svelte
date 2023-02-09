@@ -8,6 +8,7 @@
     import { Api } from "@/services/api";
     import { link, replace } from "svelte-spa-router";
     import { Record } from "pocketbase";
+    import BulkBar from "../base/BulkBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
 
@@ -44,6 +45,13 @@
             filter: `gift_report ~ "${giftReportId ?? ""}" && household ~ "${householdId ?? ""}"`,
         });
         isLoading = false;
+    }
+
+    async function deleteSelected() {
+        const selectedIds = Object.keys(bulkSelected);
+        await Promise.all(selectedIds.map((id) => Api.deleteGiftById(id)));
+        bulkSelected = {};
+        load();
     }
 </script>
 
@@ -108,6 +116,17 @@
             {
                 name: "gift_type",
                 label: "Phần quà",
+            },
+        ]}
+    />
+
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Xóa",
+                onClick: deleteSelected,
+                isDanger: true,
             },
         ]}
     />

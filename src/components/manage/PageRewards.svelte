@@ -8,6 +8,7 @@
     import { Api } from "@/services/api";
     import { Record } from "pocketbase";
     import { link } from "svelte-spa-router";
+    import BulkBar from "../base/BulkBar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
 
@@ -46,6 +47,13 @@
             filter: `reward_report ~ '${rewardReportId ?? ""}' && household ~ "${householdId ?? ""}"`,
         });
         isLoading = false;
+    }
+
+    async function deleteSelected() {
+        const selectedIds = Object.keys(bulkSelected);
+        await Promise.all(selectedIds.map((id) => Api.deleteRewardById(id)));
+        bulkSelected = {};
+        load();
     }
 </script>
 
@@ -127,6 +135,17 @@
             {
                 name: "amount",
                 label: "Số lượng",
+            },
+        ]}
+    />
+
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Xóa",
+                onClick: deleteSelected,
+                isDanger: true,
             },
         ]}
     />
