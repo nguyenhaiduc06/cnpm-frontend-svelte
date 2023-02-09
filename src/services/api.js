@@ -141,6 +141,10 @@ export class Api {
         return record;
     }
 
+    static async createRewardReport(rewardReportData) {
+        await ApiClient.collection("reward_report").create(rewardReportData);
+    }
+
     static async deleteRewardReport(report) {
         await ApiClient.collection("reward_report").delete(report.id);
     }
@@ -167,6 +171,10 @@ export class Api {
     }
 
     static async createReward(rewardData) {
+        const snapshot = await ApiClient.collection("resident_snapshots").getFirstListItem(200, {
+            filter: `active = true && resident = "${rewardData.get("resident")}"`,
+        });
+        rewardData.set("household", snapshot.household);
         await ApiClient.collection("reward").create(rewardData);
     }
 

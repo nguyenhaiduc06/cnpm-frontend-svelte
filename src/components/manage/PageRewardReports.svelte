@@ -61,5 +61,5 @@
     bind:this={addRewardReportFormPanel}
     title="Tạo danh sách khen thưởng mới"
     fields={CollectionRewardReport.schema}
-    on:submit={(e) => console.log(e.detail)}
+    on:submit={(e) => Api.createRewardReport(e.detail).then(load)}
 />

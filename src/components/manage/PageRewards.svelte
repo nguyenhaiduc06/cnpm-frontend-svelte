@@ -76,9 +76,10 @@
 <FormPanel
     bind:this={addRewardFormPanel}
     title="Thêm khen thưởng"
-    fields={CollectionReward.schema}
+    fields={CollectionReward.schema.filter((field) => !["household", "reward_report"].includes(field.name))}
     on:submit={(e) => {
-        Api.createReward(e.detail);
-        load();
+        const rewardData = e.detail;
+        rewardData.set("reward_report", rewardReport.id);
+        Api.createReward(rewardData).then(load);
     }}
 />

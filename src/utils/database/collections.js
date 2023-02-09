@@ -457,7 +457,7 @@ export const CollectionReward = {
             name: "resident",
             type: "relation",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {
                 maxSelect: 1,
@@ -466,11 +466,24 @@ export const CollectionReward = {
             },
         },
         {
+            id: "2xq2f1h8",
+            name: "household",
+            type: "relation",
+            system: false,
+            required: false,
+            unique: false,
+            options: {
+                maxSelect: 1,
+                collectionId: "f0ehmbvhv3tcp5w",
+                cascadeDelete: false,
+            },
+        },
+        {
             id: "tdlmdv4q",
             name: "reward_report",
             type: "relation",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {
                 maxSelect: 1,
@@ -483,7 +496,7 @@ export const CollectionReward = {
             name: "school",
             type: "text",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {
                 min: 1,
@@ -496,7 +509,7 @@ export const CollectionReward = {
             name: "class",
             type: "text",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {
                 min: 1,
@@ -521,7 +534,7 @@ export const CollectionReward = {
             name: "education_result",
             type: "select",
             system: false,
-            required: true,
+            required: false,
             unique: false,
             options: {
                 maxSelect: 1,
