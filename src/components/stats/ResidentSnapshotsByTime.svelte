@@ -1,6 +1,6 @@
 <script>
     import client from "@/utils/ApiClient";
-    import { CollectionResidentSnapshots } from "@/utils/database/collections";
+    import { Record } from "pocketbase";
     import PageWrapper from "../base/PageWrapper.svelte";
     import Table from "../base/Table.svelte";
     import DateField from "../records/fields/DateField.svelte";
@@ -11,27 +11,39 @@
     let endDate;
     $: filteredRecords = records.filter((r) => {
         if (!startDate || !endDate) {
-            return true;
+            return r.active == true;
         }
-        //TODO: return record that valid between startDate and endDate;
-        return true;
+        return before(startDate, r.created) && before(r.updated, endDate);
     });
 
     load();
 
     async function load() {
         isLoading = true;
-        records = await client.collection("resident_snapshots").getFullList(200, {
+        const snapshots = await client.collection("resident_snapshots").getFullList(200, {
             sort: "-created",
+            expand: "resident, household",
             $autoCancel: false,
         });
-        console.log("🚀 ~ records", records);
+        records = snapshots.map((record) => {
+            const { id, created, updated, active, expand } = record;
+            const { resident, household } = expand;
+            const { name } = resident ?? {};
+            const { address } = household ?? {};
+            return new Record({ id, name, address, created, updated, active });
+        });
         isLoading = false;
+    }
+
+    function before(t1, t2) {
+        const d1 = new Date(t1).getTime();
+        const d2 = new Date(t2).getTime();
+        return d1 <= d2;
     }
 </script>
 
 <PageWrapper>
-    <div class="flex">
+    <div class="flex m-b-sm">
         <DateField
             field={{
                 id: "end_date",
@@ -62,9 +74,16 @@
             }}
             bind:value={endDate}
         />
-        <button type="button" class="btn btn-expanded" on:click={load}>
-            <span class="txt">Lọc</span>
-        </button>
     </div>
-    <Table {isLoading} records={filteredRecords} fields={CollectionResidentSnapshots.schema} />
+    <Table
+        {isLoading}
+        records={filteredRecords}
+        fields={[
+            { name: "name", label: "Họ và tên" },
+            {
+                name: "address",
+                label: "Địa chỉ",
+            },
+        ]}
+    />
 </PageWrapper>
