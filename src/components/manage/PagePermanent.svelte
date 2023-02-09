@@ -231,6 +231,7 @@
             {
                 name: "birthday",
                 label: "Ngày sinh",
+                type: "date",
             },
             {
                 name: "number",

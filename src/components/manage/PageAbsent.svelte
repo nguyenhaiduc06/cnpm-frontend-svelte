@@ -48,8 +48,9 @@
             {
                 name: "from",
                 label: "Từ ngày",
+                type: "date",
             },
-            { name: "to", label: "Tới ngày" },
+            { name: "to", label: "Tới ngày", type: "date" },
         ]}
         {isLoading}
     />
