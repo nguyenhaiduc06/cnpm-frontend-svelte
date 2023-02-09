@@ -35,7 +35,6 @@
     }
 
     export function show(model) {
-        console.log("🚀 ~ model", model)
         load(model);
         panel?.show();
     }
