@@ -135,7 +135,7 @@
 <FormPanel
     bind:this={addGiftFormPanel}
     title="Thêm khen thưởng"
-    fields={CollectionGift.schema}
+    fields={CollectionGift.schema.filter((field) => !["household", "gift_report"].includes(field.name))}
     on:submit={(e) => {
         const giftData = e.detail;
         giftData.set("gift_report", giftReport?.id);

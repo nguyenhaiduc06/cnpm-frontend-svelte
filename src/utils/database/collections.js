@@ -518,18 +518,6 @@ export const CollectionReward = {
             },
         },
         {
-            id: "ldy0tojk",
-            name: "grade",
-            type: "number",
-            system: false,
-            required: false,
-            unique: false,
-            options: {
-                min: 1,
-                max: 12,
-            },
-        },
-        {
             id: "dan8tzfp",
             name: "education_result",
             type: "select",
