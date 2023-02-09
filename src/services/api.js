@@ -183,6 +183,20 @@ export class Api {
             filter: `active = true && resident = "${rewardData.get("resident")}"`,
         });
         rewardData.set("household", snapshot.household);
+
+        let amount = 10;
+        switch (rewardData.get("education_result")) {
+            case "Average":
+                amount = 7;
+                break;
+            case "Bad":
+                amount = 5;
+                break;
+            default:
+                break;
+        }
+        rewardData.set("amount", amount);
+
         await ApiClient.collection("reward").create(rewardData);
     }
 
