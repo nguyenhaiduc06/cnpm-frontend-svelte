@@ -11,13 +11,19 @@
     import ResidentSnapshotsByTime from "./ResidentSnapshotsByTime.svelte";
     let genderChartCanvas;
     let ageChartCanvas;
+    let absentTemporaryChartCanvas;
     let chartInst;
     let ageDataSet = [0, 0, 0, 0];
     let genderDataSet = [0, 0];
+    let absentTemporaryDataSet = [0, 0];
 
     onMount(async () => {
         const residents = await Api.getResidents();
 
+        const absentResidents = await Api.getAbsentResidents();
+        const temporaryResidents = await Api.getTemporaryResidents();
+
+        absentTemporaryDataSet = (absentResidents && temporaryResidents) ? [absentResidents.length, temporaryResidents.length] : [0, 0];
         for (const record of residents) {
             const { resident } = record.expand;
             const { birthday, gender } = resident ?? {};
@@ -36,9 +42,9 @@
                 ageDataSet[3]++;
             }
 
-            if (gender == "nam") {
+            if (gender.toLowerCase() == "nam") {
                 genderDataSet[0]++;
-            } else if (gender == "nữ") {
+            } else if (gender.toLowerCase() == "nữ") {
                 genderDataSet[1]++;
             }
         }
@@ -74,6 +80,20 @@
                 ],
             },
         });
+
+        new Chart(absentTemporaryChartCanvas, {
+            type: "doughnut",
+            data: {
+                labels: ["Tạm trú", "Tạm vắng"],
+                datasets: [
+                    {
+                        label: "Giới tính",
+                        data: absentTemporaryDataSet,
+                        backgroundColor: ["#f87171", "#60a5fa"],
+                    },
+                ],
+            },
+        });
     });
 </script>
 
@@ -96,7 +116,7 @@
             <canvas bind:this={ageChartCanvas} class="chart-canvas" style="height: 250px; width: 100%;" />;
         </div>
         <div class="col-lg-4 panel">
-            <h1>Tạm trú / Tạm vắng</h1>
+            <canvas bind:this={absentTemporaryChartCanvas} class="chart-canvas" style="height: 250px; width: 100%;" />;
         </div>
         <div class="col-lg-12 panel">
             <h1>Nhân khẩu theo thời gian</h1>
