@@ -30,26 +30,31 @@
     let search;
     let records = [];
     $: regex = new RegExp(`${search}.*`);
-    $: console.log(regex, "abc".match(regex))
     $: filteredRecords = records.filter((r) => {
         const { name, citizen_id, address } = r;
-        return name.toLowerCase().match(regex) || citizen_id.toLowerCase().match(regex) || address.toLowerCase().match(regex);
+        return (
+            name.toLowerCase().match(regex) ||
+            citizen_id.toLowerCase().match(regex) ||
+            address.toLowerCase().match(regex)
+        );
     });
     let bulkSelected;
 
-    load();
+    $: householdId, load();
 
     async function load() {
         isLoading = true;
-        records = await Api.getPermanentResidents({ filter: "active = true" });
+        const filter = householdId ? `active = true && household = "${householdId}"` : "active = true";
+        records = await Api.getPermanentResidents({ filter });
         isLoading = false;
     }
 
-    function filterByHousehold(householdId) {
+    function filterByHousehold(data) {
+        const householdId = data.get("household");
         if (!householdId) {
             return;
         }
-        replace(`/manage/residents?householdId=${householdId}`);
+        replace(`/manage/permanent?householdId=${householdId}`);
     }
 
     async function registerPermanent(data) {
@@ -302,5 +307,5 @@
     bind:this={filterByHouseholdFormPanel}
     title="Filter"
     fields={CollectionResidentSnapshots.schema.filter((field) => field.name == "household")}
-    on:submit={(e) => filterByHousehold(e.detail.household)}
+    on:submit={(e) => filterByHousehold(e.detail)}
 />
