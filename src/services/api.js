@@ -199,10 +199,10 @@ export class Api {
 
         let amount = 10;
         switch (rewardData.get("education_result")) {
-            case "Average":
+            case "Tiên tiến":
                 amount = 7;
                 break;
-            case "Bad":
+            case "Trung bình":
                 amount = 5;
                 break;
             default:
