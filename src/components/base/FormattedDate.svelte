@@ -1,15 +1,18 @@
 <script>
     export let date = "";
 
-    $: dateOnly = date ? date.substring(0, 10) : null;
 
-    $: timeOnly = date ? date.substring(10, 19) : null;
+    // $: dateOnly = date ? date.substring(0, 10) : null;
+    $: dateOnly = date ? new Date(date).toLocaleDateString("vi") : null;
+
+    // $: timeOnly = date ? date.substring(10, 19) : null;
+    $: timeOnly = date ? new Date(date).toLocaleTimeString("vi") : null;
 </script>
 
 {#if date}
     <div class="datetime">
         <div class="date">{dateOnly}</div>
-        <div class="time">{timeOnly} UTC</div>
+        <div class="time">{timeOnly}</div>
     </div>
 {:else}
     <span class="txt txt-hint">N/A</span>
