@@ -87,19 +87,16 @@
         </nav>
     </header>
     <div class="grid">
-        <div class="col-lg-6 panel">
+        <div class="col-lg-4 panel">
             <h1>Giới tính</h1>
             <canvas bind:this={genderChartCanvas} class="chart-canvas" style="height: 250px; width: 100%;" />
         </div>
-        <div class="col-lg-6 panel">
+        <div class="col-lg-4 panel">
             <h1>Độ tuổi</h1>
             <canvas bind:this={ageChartCanvas} class="chart-canvas" style="height: 250px; width: 100%;" />;
         </div>
-        <div class="col-lg-6 panel">
-            <h1>Tạm trú</h1>
-        </div>
-        <div class="col-lg-6 panel">
-            <h1>Tạm vắng</h1>
+        <div class="col-lg-4 panel">
+            <h1>Tạm trú / Tạm vắng</h1>
         </div>
         <div class="col-lg-12 panel">
             <h1>Nhân khẩu theo thời gian</h1>
