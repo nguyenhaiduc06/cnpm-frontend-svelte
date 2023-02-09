@@ -160,13 +160,15 @@ export class Api {
             sort: "-created",
             expand: "resident, household",
         });
+        console.log("🚀 ~ records", records)
         return records.map((record) => {
-            const { id, school, grade, education_result, education_proof, amount, expand } = record;
+            const { id, collectionId, school, grade, education_result, education_proof, amount, expand } = record;
             const { resident, household } = expand;
             const { name } = resident ?? {};
             const { address } = household ?? {};
             return new Record({
                 id,
+                collectionId, // need collectionId to get url to uploaded image
                 name,
                 address,
                 school,
