@@ -273,8 +273,8 @@ export class Api {
                 change_type,
                 old_household: old_household_id,
                 new_household: new_household_id,
-                old_address,
-                new_address,
+                old_address: change_type == "Qua đời" ? undefined : old_address,
+                new_address: change_type == "Qua đời" ? undefined : new_address,
             });
         });
     }

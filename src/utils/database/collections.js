@@ -131,7 +131,7 @@ export const CollectionResidentChanges = {
     schema: [
         {
             id: "j9pxem2t",
-            name: "residents",
+            name: "resident",
             type: "relation",
             system: false,
             required: false,
@@ -195,7 +195,7 @@ export const CollectionResidentChanges = {
             },
         },
         {
-            id: "kdtotuxc",
+            id: "7h5ynrt6",
             name: "change_type",
             type: "select",
             system: false,
@@ -203,7 +203,7 @@ export const CollectionResidentChanges = {
             unique: false,
             options: {
                 maxSelect: 1,
-                values: ["dead", "change-household", "split-household"],
+                values: ["Qua đời", "Tách khẩu", "Chuyển khẩu"],
             },
         },
     ],
