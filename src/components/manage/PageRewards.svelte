@@ -11,13 +11,21 @@
 
     $: reactiveParams = new URLSearchParams($querystring);
 
-    $: rewardReportId = reactiveParams.get("reward-report-id") ?? "";
+    $: rewardReportId = reactiveParams.get("reward-report-id");
     let rewardReport;
-    $: Api.getRewardReportById(rewardReportId).then((record) => (rewardReport = record));
+    $: if (rewardReportId) {
+        Api.getRewardReportById(rewardReportId).then((record) => (rewardReport = record));
+    } else {
+        rewardReport = undefined;
+    }
 
     $: householdId = reactiveParams.get("household-id");
     let household;
-    $: householdId && Api.getHouseholdById(householdId).then((record) => (household = record));
+    $: if (householdId) {
+        Api.getHouseholdById(householdId).then((record) => (household = record));
+    } else {
+        household = undefined;
+    }
 
     let addRewardFormPanel;
     let filterByHouseholdFormPanel;
@@ -35,7 +43,7 @@
     async function load() {
         isLoading = true;
         records = await Api.getRewards({
-            filter: `reward_report ~ '${rewardReportId}' && household ~ "${householdId}"`,
+            filter: `reward_report ~ '${rewardReportId ?? ""}' && household ~ "${householdId ?? ""}"`,
         });
         isLoading = false;
     }
