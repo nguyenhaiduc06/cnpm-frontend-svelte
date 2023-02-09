@@ -76,6 +76,11 @@ export class Api {
         return records;
     }
 
+    static async getHouseholdById(householdId) {
+        const record = await ApiClient.collection("households").getOne(householdId);
+        return record;
+    }
+
     static async createHousehold(householdData) {
         return ApiClient.collection("households").create(householdData);
     }
@@ -153,19 +158,22 @@ export class Api {
         const records = await ApiClient.collection("reward").getFullList(200, {
             filter,
             sort: "-created",
-            expand: "resident",
+            expand: "resident, household",
         });
         return records.map((record) => {
-            const { id, school, grade, education_result, education_proof, expand } = record;
-            const { resident } = expand;
-            const { name } = resident;
+            const { id, school, grade, education_result, education_proof, amount, expand } = record;
+            const { resident, household } = expand;
+            const { name } = resident ?? {};
+            const { address } = household ?? {};
             return new Record({
                 id,
                 name,
+                address,
                 school,
                 grade,
                 education_result,
                 education_proof,
+                amount,
             });
         });
     }

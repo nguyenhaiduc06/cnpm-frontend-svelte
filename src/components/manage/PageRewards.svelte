@@ -6,23 +6,36 @@
     import FormPanel from "@/components/base/FormPanel.svelte";
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
+    import { Record } from "pocketbase";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: rewardReportId = reactiveParams.get("reward-report-id") || "";
+
+    $: rewardReportId = reactiveParams.get("reward-report-id") ?? "";
     let rewardReport;
     $: Api.getRewardReportById(rewardReportId).then((record) => (rewardReport = record));
 
+    $: householdId = reactiveParams.get("household-id") ?? "";
+    let household;
+    $: Api.getHouseholdById(householdId).then((record) => (household = record));
+
     let addRewardFormPanel;
+    let filterByHouseholdFormPanel;
 
     let isLoading;
-    let records;
+    let records = [];
     let bulkSelected;
 
-    $: rewardReportId, load();
+    $: totalRewardAmount = records.reduce((prev, cur) => {
+        return prev + cur?.amount ?? 0;
+    }, 0);
+
+    $: rewardReportId, householdId, load();
 
     async function load() {
         isLoading = true;
-        records = await Api.getRewards({ filter: `reward_report = '${rewardReportId}'` });
+        records = await Api.getRewards({
+            filter: `reward_report ~ '${rewardReportId}' && household ~ "${householdId}"`,
+        });
         isLoading = false;
     }
 </script>
@@ -35,12 +48,32 @@
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">Khen thưởng</div>
             <div class="breadcrumb-item">{rewardReport?.name ?? ""}</div>
+            {#if household?.number}
+                <div class="breadcrumb-item">Hộ khẩu số {household?.number ?? ""}</div>
+            {/if}
         </nav>
     </header>
+
+    <div class="m-b-sm">
+        <h1>Tổng số lượng phần thưởng: {totalRewardAmount}</h1>
+    </div>
+
     <div class="flex m-b-sm">
         <button type="button" class="btn btn-expanded" on:click={() => addRewardFormPanel?.show()}>
             <i class="ri-add-line" />
             <span class="txt">Thêm khen thưởng</span>
+        </button>
+        <div class="flex-fill" />
+        <button
+            type="button"
+            class="btn btn-outline"
+            on:click={() =>
+                filterByHouseholdFormPanel?.show(
+                    household ? new Record({ household: household.id }) : undefined
+                )}
+        >
+            <i class="ri-filter-line" />
+            <span class="txt">Lọc theo hộ khẩu</span>
         </button>
     </div>
 
@@ -52,6 +85,10 @@
             {
                 name: "name",
                 label: "Họ và tên",
+            },
+            {
+                name: "address",
+                label: "Địa chỉ",
             },
             {
                 name: "school",
@@ -69,6 +106,10 @@
                 name: "education_proof",
                 label: "Minh chứng",
             },
+            {
+                name: "amount",
+                label: "Số lượng",
+            },
         ]}
     />
 </PageWrapper>
@@ -81,5 +122,14 @@
         const rewardData = e.detail;
         rewardData.set("reward_report", rewardReport.id);
         Api.createReward(rewardData).then(load);
+    }}
+/>
+
+<FormPanel
+    bind:this={filterByHouseholdFormPanel}
+    title="Chọn hộ khẩu"
+    fields={CollectionReward.schema.filter((field) => ["household"].includes(field.name))}
+    on:submit={(e) => {
+        householdId = e.detail.get("household");
     }}
 />
