@@ -20,7 +20,7 @@
         }
 
         if (ApiClient.authStore.isValid) {
-            replace("/collections");
+            replace("/manage");
         } else {
             ApiClient.logout();
         }
