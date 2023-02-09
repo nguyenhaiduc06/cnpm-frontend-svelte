@@ -1,13 +1,8 @@
 <script>
     import { replace } from "svelte-spa-router";
-    import Searchbar from "@/components/base/Searchbar.svelte";
-    import RefreshButton from "@/components/base/RefreshButton.svelte";
-    import RecordUpsertPanel from "@/components/base/RecordUpsertPanel.svelte";
-    import RecordsList from "@/components/records/RecordsList.svelte";
     import PageWrapper from "@/components/base/PageWrapper.svelte";
     import ManageSidebar from "./ManageSidebar.svelte";
-    import { CollectionGiftReport, CollectionHouseholds } from "../../utils/database/collections";
-    import { CollectionRewardReport } from "../../utils/database/collections";
+    import { CollectionGiftReport } from "../../utils/database/collections";
     import Table from "../base/Table.svelte";
     import { Api } from "@/services/api";
     import FormPanel from "../base/FormPanel.svelte";
@@ -62,6 +57,6 @@
     title="Tạo danh sách trao quà mới"
     fields={CollectionGiftReport.schema}
     on:submit={(e) => {
-        Api.createGiftReport(e.detail).then((res) => load());
+        Api.createGiftReport(e.detail).then(load);
     }}
 />

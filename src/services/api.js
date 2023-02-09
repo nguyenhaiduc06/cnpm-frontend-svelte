@@ -114,14 +114,24 @@ export class Api {
         const records = await ApiClient.collection("gift").getFullList(200, {
             sort: "-created",
             filter,
-            expand: "resident",
+            expand: "resident, household",
         });
         return records.map((record) => {
-            const { id, expand } = record;
-            const { resident } = expand;
-            const { name } = resident;
-            return new Record({ id, name });
+            const { id, gift_type, expand } = record;
+            const { resident, household } = expand;
+            const { name } = resident ?? {};
+            const { address } = household ?? {};
+            return new Record({ id, name, address, gift_type });
         });
+    }
+
+    static async createGift(giftData) {
+        const snapshot = await ApiClient.collection("resident_snapshots").getFirstListItem(200, {
+            filter: `active = true && resident = "${giftData.get("resident")}"`,
+        });
+        giftData.set("household", snapshot.household);
+
+        await ApiClient.collection("gift").create(giftData);
     }
 
     static async deleteGift(giftId) {
@@ -160,9 +170,10 @@ export class Api {
             sort: "-created",
             expand: "resident, household",
         });
-        console.log("🚀 ~ records", records)
+        console.log("🚀 ~ records", records);
         return records.map((record) => {
-            const { id, collectionId, school, grade, education_result, education_proof, amount, expand } = record;
+            const { id, collectionId, school, grade, education_result, education_proof, amount, expand } =
+                record;
             const { resident, household } = expand;
             const { name } = resident ?? {};
             const { address } = household ?? {};
