@@ -12,6 +12,7 @@ import PageResidentsReport from "./components/manage/PageResidentsReport.svelte"
 import PageResidentHistoryChange from "./components/manage/PageResidentsHistoryChange.svelte";
 import PageAbsent from "@/components/manage/PageAbsent.svelte";
 import PageTemporary from "@/components/manage/PageTemporary.svelte";
+
 import PageRewardReports from "./components/manage/PageRewardReports.svelte";
 import PageRewards from "./components/manage/PageRewards.svelte";
 import PageGiftReports from "./components/manage/PageGiftReports.svelte";
@@ -117,7 +118,7 @@ const routes = {
         userData: { showAppSidebar: true },
     }),
 
-    "/manage/reward-reports": wrap({
+    "/manage/rewards/reward-reports": wrap({
         component: PageRewardReports,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },
@@ -129,7 +130,7 @@ const routes = {
         userData: { showAppSidebar: true },
     }),
 
-    "/manage/gift-reports": wrap({
+    "/manage/gifts/gift-reports": wrap({
         component: PageGiftReports,
         conditions: baseConditions.concat([(_) => ApiClient.authStore.isValid]),
         userData: { showAppSidebar: true },

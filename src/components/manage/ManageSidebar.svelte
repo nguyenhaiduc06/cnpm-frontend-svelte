@@ -38,18 +38,18 @@
             <span class="txt">Tạm trú</span>
         </a>
         <a
-            href="/manage/reward-reports"
+            href="/manage/rewards/reward-reports"
             class="sidebar-list-item"
             use:link
-            use:active={{ path: "/manage/reward-reports.*", className: "active" }}
+            use:active={{ path: "/manage/rewards.*", className: "active" }}
         >
             <span class="txt">Khen thưởng</span>
         </a>
         <a
-            href="/manage/gift-reports"
+            href="/manage/gifts/gift-reports"
             class="sidebar-list-item"
             use:link
-            use:active={{ path: "/manage/gift-report.*", className: "active" }}
+            use:active={{ path: "/manage/gifts.*", className: "active" }}
         >
             <span class="txt">Trao quà</span>
         </a>

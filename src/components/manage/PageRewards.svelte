@@ -56,7 +56,7 @@
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">
-                <a href="/manage/reward-reports" use:link>
+                <a href="/manage/rewards/reward-reports" use:link>
                     <span>Khen thưởng</span>
                 </a>
             </div>

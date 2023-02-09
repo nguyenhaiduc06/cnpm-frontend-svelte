@@ -54,7 +54,7 @@
         <nav class="breadcrumbs">
             <div class="breadcrumb-item">Quản lý</div>
             <div class="breadcrumb-item">
-                <a href="/manage/gift-reports" use:link>
+                <a href="/manage/gifts/gift-reports" use:link>
                     <span>Trao quà</span>
                 </a>
             </div>
