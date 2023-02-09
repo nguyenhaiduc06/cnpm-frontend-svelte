@@ -18,7 +18,7 @@
     import Searchbar from "../base/Searchbar.svelte";
 
     $: reactiveParams = new URLSearchParams($querystring);
-    $: householdId = reactiveParams.get("household-id") || "";
+    $: householdId = reactiveParams.get("household-id");
     let household;
     $: if (householdId) {
         Api.getHouseholdById(householdId).then((record) => (household = record));
@@ -45,12 +45,13 @@
         );
     });
     let bulkSelected;
+    $: console.log("🚀 ~ bulkSelected", bulkSelected);
 
     $: householdId, load();
 
     async function load() {
         isLoading = true;
-        const filter = householdId ? `active = true && household = "${householdId}"` : "active = true";
+        const filter = householdId ? `active = true && household ~ "${householdId ?? ""}"` : "active = true";
         records = await Api.getPermanentResidents({ filter });
         isLoading = false;
     }
@@ -64,18 +65,14 @@
     }
 
     async function registerPermanent(data) {
-        const { name, birthday, gender, citizen_id, household, relation_with_householder } = data;
         try {
-            const resident = await Api.createResident({ name, birthday, gender, citizen_id });
-            await Api.createResidentSnapshot({
-                resident: resident.id,
-                household,
-                relation_with_householder,
-                alive: true,
-                note: "",
-                active: true,
-            });
-            addSuccessToast(`Đã đăng kí thường trú thành công cho ${name}`);
+            const resident = await Api.createResident(data);
+            data.set("resident", resident.id);
+            data.set("alive", true);
+            data.set("active", true);
+            await Api.createResidentSnapshot(data);
+            load();
+            addSuccessToast(`Đã đăng kí thường trú thành công cho ${data.get("name")}`);
         } catch (e) {
             addErrorToast(e.message);
         }
@@ -86,109 +83,69 @@
         ApiClient.collection(residentSnapshotCollectionId).update(record.id, data);
     }
 
-    async function changeHousehold(data) {
-        try {
-            const { household } = data;
-            await Promise.all(
-                Object.keys(bulkSelected).map(async (recordId) => {
-                    const record = await Api.getResidentSnapshot(recordId);
-                    await Api.updateResidentSnapshot(recordId, {
-                        ...record,
-                        active: false,
-                    });
-                    const residentSnapshot = await Api.createResidentSnapshot({
-                        resident: record.resident,
-                        household,
-                        relation_with_householder: record.relation_with_householder,
-                        alive: true,
-                        note: record.note,
-                        active: true,
-                    });
+    async function changeHousehold(changeData) {
+        const selectedSnapshots = Object.values(bulkSelected);
 
-                    const residentChange = await Api.createResidentChange({
-                        resident: record.resident,
-                        old_household: record.household,
-                        new_household: household,
-                        old_snapshot: recordId,
-                        new_snapshot: residentSnapshot.id,
-                        change_type: "change-household",
+        for (const snapshot of selectedSnapshots) {
+            if (snapshot.household != selectedSnapshots[0].household) {
+                addErrorToast("Các nhân khẩu đã chọn không cùng một hộ");
+                return;
+            }
+        }
+
+        const newHousehold = changeData.get("household");
+        const relationWithNewHouseholder = changeData.get("relation_with_householder");
+
+        try {
+            await Promise.all(
+                selectedSnapshots.map((snapshot) => {
+                    Api.changeSnapshotHousehold(snapshot, {
+                        household: newHousehold,
+                        relation_with_householder: relationWithNewHouseholder,
                     });
                 })
             );
+            bulkSelected = {};
+            load();
             addSuccessToast(`Đã chuyển khẩu thành công`);
         } catch (error) {
             addErrorToast(e.message);
         }
     }
 
-    async function splitIntoNewHousehold(data) {
-        const bulkSelected = selectedResidents;
-        try {
-            const newHousehold = await Api.createHousehold(data);
-            await Promise.all(
-                Object.keys(bulkSelected).map(async (recordId) => {
-                    const record = await Api.getResidentSnapshot(recordId);
-                    await Api.updateResidentSnapshot(recordId, {
-                        ...record,
-                        active: false,
-                    });
-                    const residentSnapshot = await Api.createResidentSnapshot({
-                        resident: record.resident,
-                        household: newHousehold.id,
-                        relation_with_householder: record.relation_with_householder,
-                        alive: true,
-                        note: record.note,
-                        active: true,
-                    });
+    async function splitIntoNewHousehold(newHouseholdData) {
+        const selectedSnapshots = Object.values(bulkSelected);
 
-                    const residentChange = await Api.createResidentChange({
-                        resident: record.resident,
-                        old_household: record.household,
-                        new_household: newHousehold.id,
-                        old_snapshot: recordId,
-                        new_snapshot: residentSnapshot.id,
-                        change_type: "split-household",
-                    });
+        for (const snapshot of selectedSnapshots) {
+            if (snapshot.household != selectedSnapshots[0].household) {
+                addErrorToast("Các nhân khẩu đã chọn không cùng một hộ");
+                return;
+            }
+        }
+
+        try {
+            const newHousehold = await Api.createHousehold(newHouseholdData);
+            await Promise.all(
+                selectedSnapshots.map((snapshot) => {
+                    Api.splitSnapshotHousehold(snapshot, { household: newHousehold.id });
                 })
             );
+            bulkSelected = {};
+            load();
             addSuccessToast(`Đã tách khẩu thành công`);
-        } catch (error) {
+        } catch (e) {
             addErrorToast(e.message);
         }
     }
 
-    async function markAsDead(data) {
-        //TODO: alert
+    async function markSelectedAsDead() {
+        const selectedSnapshots = Object.values(bulkSelected);
         try {
-            const { household } = data;
-            await Promise.all(
-                Object.keys(bulkSelected).map(async (recordId) => {
-                    const record = await Api.getResidentSnapshot(recordId);
-                    await Api.updateResidentSnapshot(recordId, {
-                        ...record,
-                        active: false,
-                    });
-                    const residentSnapshot = await Api.createResidentSnapshot({
-                        resident: record.resident,
-                        household: record.household,
-                        relation_with_householder: record.relation_with_householder,
-                        alive: true,
-                        note: "dead",
-                        active: true,
-                    });
-
-                    const residentChange = await Api.createResidentChange({
-                        resident: record.resident,
-                        old_household: record.household,
-                        new_household: record.household,
-                        old_snapshot: recordId,
-                        new_snapshot: residentSnapshot.id,
-                        change_type: "dead",
-                    });
-                })
-            );
+            await Promise.all(selectedSnapshots.map((snapshot) => Api.maskSnapshotAsDead(snapshot)));
+            bulkSelected = {};
+            load();
             addSuccessToast(`Đã khai tử`);
-        } catch (error) {
+        } catch (e) {
             addErrorToast(e.message);
         }
     }
@@ -215,14 +172,10 @@
             <i class="ri-add-line" />
             <span class="txt">Đăng kí thường trú</span>
         </button>
-        <!-- <a class="btn btn-outline" href="/manage/residents/historyChange" use:link>
-            <i class="ri-history-line" />
-            <span class="txt">Lịch sử thay đổi</span>
-        </a> -->
         <div class="flex-fill" />
         <button type="button" class="btn btn-outline" on:click={() => filterByHouseholdFormPanel.show()}>
             <i class="ri-filter-line" />
-            <span class="txt">{householdId ? `Hộ khẩu ${householdId}` : "Tất cả hộ khẩu"}</span>
+            <span class="txt">Lọc theo hộ khẩu</span>
         </button>
     </div>
 
@@ -262,6 +215,10 @@
                 name: "relation_with_householder",
                 label: "Quan hệ với chủ hộ",
             },
+            {
+                name: "note",
+                label: "Ghi chú",
+            },
         ]}
         on:select={(e) => updateResidentFormPanel?.show(e.detail)}
     />
@@ -279,7 +236,7 @@
             },
             {
                 label: "Khai tử",
-                onClick: () => markAsDead(bulkSelected),
+                onClick: markSelectedAsDead,
                 isDanger: true,
             },
         ]}
@@ -317,7 +274,9 @@
 <FormPanel
     bind:this={selectHouseholdFormPanel}
     title="Chọn hộ khẩu chuyển đến"
-    fields={CollectionResidentSnapshots.schema.filter((s) => ["household"].includes(s.name))}
+    fields={CollectionResidentSnapshots.schema.filter((s) =>
+        ["household", "relation_with_householder"].includes(s.name)
+    )}
     on:submit={(e) => changeHousehold(e.detail)}
 />
 

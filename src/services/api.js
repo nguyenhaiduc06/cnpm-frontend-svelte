@@ -21,10 +21,11 @@ export class Api {
         });
 
         return records.map((record) => {
-            const { id, relation_with_householder } = record;
+            const { id, relation_with_householder, note } = record;
             const { resident, household } = record.expand;
             const { id: residentId, name, gender, birthday, citizen_id } = resident ?? {};
-            const { number, address } = household ?? {};
+            const { id: householdId, number, address } = household ?? {};
+            console.log("🚀 ~ householdId", householdId);
             return new Record({
                 id,
                 name,
@@ -34,8 +35,85 @@ export class Api {
                 address,
                 citizen_id,
                 relation_with_householder,
+                note,
                 resident: residentId,
+                household: householdId,
             });
+        });
+    }
+
+    static async maskSnapshotAsDead(snapshot) {
+        await this.updateResidentSnapshot(snapshot.id, {
+            ...snapshot,
+            active: false,
+        });
+
+        const newSnapshot = await Api.createResidentSnapshot({
+            resident: snapshot.resident,
+            household: snapshot.household,
+            relation_with_householder: snapshot.relation_with_householder,
+            alive: false,
+            note: "Đã qua đời",
+            active: true,
+        });
+
+        await Api.createResidentChange({
+            resident: snapshot.resident,
+            old_household: snapshot.household,
+            new_household: snapshot.household,
+            old_snapshot: snapshot.id,
+            new_snapshot: newSnapshot.id,
+            change_type: "Qua đời",
+        });
+    }
+
+    static async changeSnapshotHousehold(snapshot, { household, relation_with_householder }) {
+        await this.updateResidentSnapshot(snapshot.id, {
+            ...snapshot,
+            active: false,
+        });
+
+        const newSnapshot = await Api.createResidentSnapshot({
+            resident: snapshot.resident,
+            household,
+            relation_with_householder,
+            alive: true,
+            note: snapshot.note,
+            active: true,
+        });
+
+        await Api.createResidentChange({
+            resident: snapshot.resident,
+            old_household: snapshot.household,
+            new_household: household,
+            old_snapshot: snapshot.id,
+            new_snapshot: newSnapshot.id,
+            change_type: "Chuyển khẩu",
+        });
+    }
+
+    static async splitSnapshotHousehold(snapshot, { household, relation_with_householder }) {
+        await this.updateResidentSnapshot(snapshot.id, {
+            ...snapshot,
+            active: false,
+        });
+
+        const newSnapshot = await Api.createResidentSnapshot({
+            resident: snapshot.resident,
+            household,
+            relation_with_householder,
+            alive: true,
+            note: snapshot.note,
+            active: true,
+        });
+
+        await Api.createResidentChange({
+            resident: snapshot.resident,
+            old_household: snapshot.household,
+            new_household: household,
+            old_snapshot: snapshot.id,
+            new_snapshot: newSnapshot.id,
+            change_type: "Tách khẩu",
         });
     }
 
@@ -83,7 +161,8 @@ export class Api {
     }
 
     static async createHousehold(householdData) {
-        return ApiClient.collection("households").create(householdData);
+        const record = await ApiClient.collection("households").create(householdData);
+        return record;
     }
 
     static async deleteHousehold(household) {
@@ -264,9 +343,9 @@ export class Api {
         return records.map((record) => {
             const { id, change_type, expand } = record;
             const { resident, old_household, new_household } = expand;
-            const { name } = resident;
-            const { id: old_household_id, address: old_address } = old_household;
-            const { id: new_household_id, address: new_address } = new_household;
+            const { name } = resident ?? {};
+            const { id: old_household_id, address: old_address } = old_household ?? {};
+            const { id: new_household_id, address: new_address } = new_household ?? {};
             return new Record({
                 id,
                 name,
