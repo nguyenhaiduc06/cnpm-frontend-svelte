@@ -80,7 +80,7 @@
             </a>
 
             <nav class="main-menu">
-                <a
+                <!-- <a
                     href="/collections"
                     class="menu-item"
                     aria-label="Collections"
@@ -89,7 +89,7 @@
                     use:tooltip={{ text: "Collections", position: "right" }}
                 >
                     <i class="ri-database-2-line" />
-                </a>
+                </a> -->
                 <a
                     href="/manage"
                     class="menu-item"
@@ -110,7 +110,7 @@
                 >
                     <i class="ri-line-chart-line" />
                 </a>
-                <a
+                <!-- <a
                     href="/settings"
                     class="menu-item"
                     aria-label="Settings"
@@ -119,7 +119,7 @@
                     use:tooltip={{ text: "Settings", position: "right" }}
                 >
                     <i class="ri-tools-line" />
-                </a>
+                </a> -->
             </nav>
 
             <figure class="thumb thumb-circle link-hint closable">
