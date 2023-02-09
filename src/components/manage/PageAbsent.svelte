@@ -6,10 +6,12 @@
     import { Api } from "@/services/api";
     import FormPanel from "../base/FormPanel.svelte";
     import { addSuccessToast } from "@/stores/toasts";
+    import BulkBar from "../base/BulkBar.svelte";
 
     let addAbsentResidentFormPanel;
     let isLoading;
     let records;
+    let bulkSelected;
 
     load();
 
@@ -22,6 +24,13 @@
     async function addAbsentResident(data) {
         await Api.createAbsentResident(data);
         addSuccessToast(`Đã đăng ký tạm vắng`);
+        load();
+    }
+
+    async function deleteSelected() {
+        const selectedIds = Object.keys(bulkSelected);
+        await Promise.all(selectedIds.map((id) => Api.deleteAbsentResidentById(id)));
+        bulkSelected = {};
         load();
     }
 </script>
@@ -53,6 +62,18 @@
             { name: "to", label: "Tới ngày", type: "date" },
         ]}
         {isLoading}
+        bind:bulkSelected
+    />
+
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Xóa",
+                onClick: deleteSelected,
+                isDanger: true,
+            },
+        ]}
     />
 </PageWrapper>
 

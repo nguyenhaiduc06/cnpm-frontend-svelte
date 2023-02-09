@@ -6,10 +6,12 @@
     import { Api } from "@/services/api";
     import FormPanel from "../base/FormPanel.svelte";
     import { addSuccessToast } from "@/stores/toasts";
+    import BulkBar from "../base/BulkBar.svelte";
 
     let addTemporaryResidentFormPanel;
     let isLoading;
     let records;
+    let bulkSelected = {};
 
     load();
 
@@ -22,6 +24,13 @@
     async function addTemporaryResident(data) {
         await Api.createTemporaryResident(data);
         addSuccessToast("Đã đăng ký tạm trú");
+        load();
+    }
+
+    async function deleteSelected() {
+        const selectedIds = Object.keys(bulkSelected);
+        await Promise.all(selectedIds.map((id) => Api.deleteTemporaryResidentById(id)));
+        bulkSelected = {};
         load();
     }
 </script>
@@ -44,6 +53,7 @@
     <Table
         {isLoading}
         {records}
+        bind:bulkSelected
         fields={[
             {
                 name: "name",
@@ -62,6 +72,17 @@
             {
                 name: "address",
                 label: "Địa chỉ tạm trú",
+            },
+        ]}
+    />
+
+    <BulkBar
+        {bulkSelected}
+        actions={[
+            {
+                label: "Xóa",
+                onClick: deleteSelected,
+                isDanger: true,
             },
         ]}
     />

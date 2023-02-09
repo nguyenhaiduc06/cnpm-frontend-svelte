@@ -297,6 +297,10 @@ export class Api {
         await ApiClient.collection("absent_residents").create(data);
     }
 
+    static async deleteAbsentResidentById(id) {
+        await ApiClient.collection("absent_residents").delete(id);
+    }
+
     static async getTemporaryResidents() {
         const result = await ApiClient.collection("temporary_residents").getFullList(200, {
             sort: "-created",
@@ -313,5 +317,9 @@ export class Api {
 
     static async createTemporaryResident(data) {
         await ApiClient.collection("temporary_residents").create(data);
+    }
+
+    static async deleteTemporaryResidentById(id) {
+        await ApiClient.collection("temporary_residents").delete(id);
     }
 }
